@@ -4,13 +4,16 @@ import NewChatFeature from './NewChatFeature';
 function Sidebar({ history, onNewChat }) {
   return (
     <div id="sidebar">
-      <h2>History</h2>
+      <div className="sidebar-header">
+        <h2>History</h2>
+        <NewChatFeature onNewChat={onNewChat} />
+      </div>
+      <div className="divider"></div>
       <ul id="history-list">
         {history.map((item, index) => (
           <li key={index}>{item}</li>
         ))}
       </ul>
-      <NewChatFeature onNewChat={onNewChat} />
     </div>
   );
 }
