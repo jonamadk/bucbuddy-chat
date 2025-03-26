@@ -8,10 +8,15 @@ function App() {
   const [history, setHistory] = useState([]);
   const [showSettings, setShowSettings] = useState(false);
   const [voiceActivate, setVoiceActivate] = useState(false);
+  const [sessionId, setSessionId] = useState(Date.now());
+
+  const handleNewChat = () => {
+    setSessionId(Date.now()); // Generate a new session ID
+  };
 
   return (
     <div className="app">
-      <Sidebar history={history} />
+      <Sidebar history={history} onNewChat={handleNewChat} />
       <div className="chat-container">
         <h1>BucBuddy</h1>
         <button 
@@ -30,6 +35,7 @@ function App() {
         <ChatWindow 
           setHistory={setHistory}
           voiceActivate={voiceActivate}
+          sessionId={sessionId}
         />
       </div>
     </div>

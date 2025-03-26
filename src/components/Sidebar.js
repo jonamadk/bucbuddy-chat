@@ -1,6 +1,7 @@
 import React from 'react';
+import NewChatFeature from './NewChatFeature';
 
-function Sidebar({ history }) {
+function Sidebar({ history, onNewChat }) {
   return (
     <div id="sidebar">
       <h2>History</h2>
@@ -9,6 +10,7 @@ function Sidebar({ history }) {
           <li key={index}>{item}</li>
         ))}
       </ul>
+      <NewChatFeature onNewChat={onNewChat} />
     </div>
   );
 }

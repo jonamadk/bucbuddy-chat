@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-function ChatWindow({ setHistory, voiceActivate }) {
+function ChatWindow({ setHistory, voiceActivate, sessionId }) {
   const [messages, setMessages] = useState([]);
   const [query, setQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const chatWindowRef = useRef(null);
   const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    setMessages([]); // Clear messages on new session
+  }, [sessionId]);
 
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -40,7 +44,7 @@ function ChatWindow({ setHistory, voiceActivate }) {
       const response = await fetch('http://localhost:8000/chat', { // Updated URL
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query })
+        body: JSON.stringify({ query, sessionId })
       });
       const data = await response.json();
 
