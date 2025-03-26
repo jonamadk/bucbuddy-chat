@@ -8,6 +8,7 @@ function Sidebar({ history, onNewChat }) {
         <h2>History</h2>
         <NewChatFeature onNewChat={onNewChat} />
       </div>
+      <div className="divider"></div>
       <ul id="history-list">
         {history.map((item, index) => (
           <li key={index}>{item}</li>
