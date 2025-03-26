@@ -3,7 +3,7 @@ import React from 'react';
 function NewChatFeature({ onNewChat }) {
   return (
     <button onClick={onNewChat} className="new-chat-button">
-      New Chat
+      <i className="fas fa-edit"></i>
     </button>
   );
 }
