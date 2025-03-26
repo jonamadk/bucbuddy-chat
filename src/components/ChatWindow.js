@@ -37,7 +37,7 @@ function ChatWindow({ setHistory, voiceActivate }) {
     setMessages(prev => [...prev, botMessage]);
 
     try {
-      const response = await fetch('/chat', {
+      const response = await fetch('http://localhost:8000/chat', { // Updated URL
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query })
