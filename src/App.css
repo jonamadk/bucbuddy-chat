@@ -246,3 +246,21 @@ button i {
 .new-chat-button:hover {
     background-color: #0056b3;
 }
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.new-chat-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #007bff;
+}
+
+.new-chat-button:hover {
+    color: #0056b3;
+}
