@@ -23,28 +23,29 @@ function ChatWindow({ setHistory, voiceActivate, sessionId }) {
 
       recognitionRef.current.onend = () => {
         setIsListening(false);
-        if (query.trim()) sendMessage();
       };
 
       recognitionRef.current.onresult = (event) => {
-        setQuery(event.results[0][0].transcript);
+        const transcript = event.results[0][0].transcript;
+        setQuery(''); // Clear the typing box
+        sendMessage(transcript); // Automatically send the captured word
       };
     }
-  }, [query]);
+  }, []);
 
-  const sendMessage = async () => {
-    const userMessage = { text: query, type: 'user' };
+  const sendMessage = async (inputQuery = query) => {
+    const userMessage = { text: inputQuery, type: 'user' };
     setMessages(prev => [...prev, userMessage]);
-    setHistory(prev => [...prev, query]);
+    setHistory(prev => [...prev, inputQuery]);
 
     const botMessage = { text: 'Loading...', type: 'bot' };
     setMessages(prev => [...prev, botMessage]);
 
     try {
-      const response = await fetch('http://localhost:8000/chat', { // Updated URL
+      const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, sessionId })
+        body: JSON.stringify({ query: inputQuery, sessionId })
       });
       const data = await response.json();
 
@@ -70,7 +71,7 @@ function ChatWindow({ setHistory, voiceActivate, sessionId }) {
         return newMessages;
       });
     }
-    setQuery('');
+    setQuery(''); // Clear the typing box after sending
   };
 
   const handleKeyDown = (e) => {
