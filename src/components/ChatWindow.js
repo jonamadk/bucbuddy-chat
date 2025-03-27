@@ -35,26 +35,34 @@ function ChatWindow({ setHistory, voiceActivate, sessionId }) {
 
   const sendMessage = async (inputQuery = query) => {
     const userMessage = { text: inputQuery, type: 'user' };
-    setMessages(prev => [...prev, userMessage]);
-    setHistory(prev => [...prev, inputQuery]);
+    setMessages((prev) => [...prev, userMessage]);
+
+    setHistory((prev) => {
+      const updatedHistory = [...prev];
+      // Update the last "New Chat" entry with the first query
+      if (updatedHistory[updatedHistory.length - 1] === "New Chat") {
+        updatedHistory[updatedHistory.length - 1] = inputQuery;
+      }
+      return updatedHistory;
+    });
 
     const botMessage = { text: 'Loading...', type: 'bot' };
-    setMessages(prev => [...prev, botMessage]);
+    setMessages((prev) => [...prev, botMessage]);
 
     try {
       const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: inputQuery, sessionId })
+        body: JSON.stringify({ query: inputQuery, sessionId }),
       });
       const data = await response.json();
 
-      setMessages(prev => {
+      setMessages((prev) => {
         const newMessages = [...prev];
         newMessages[newMessages.length - 1] = {
           text: data.response || 'Error fetching response',
           type: 'bot',
-          citations: data.citation_data || []
+          citations: data.citation_data || [],
         };
         return newMessages;
       });
@@ -65,7 +73,7 @@ function ChatWindow({ setHistory, voiceActivate, sessionId }) {
         window.speechSynthesis.speak(speech);
       }
     } catch (error) {
-      setMessages(prev => {
+      setMessages((prev) => {
         const newMessages = [...prev];
         newMessages[newMessages.length - 1] = { text: 'Error fetching response!', type: 'bot' };
         return newMessages;
