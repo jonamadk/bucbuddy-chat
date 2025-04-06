@@ -1,7 +1,7 @@
 import React from 'react';
 import NewChatFeature from './NewChatFeature';
 
-function Sidebar({ history, onNewChat }) {
+function Sidebar({ history, onNewChat, showSettings, setShowSettings }) {
   return (
     <div id="sidebar">
       <div className="sidebar-header">
@@ -14,6 +14,12 @@ function Sidebar({ history, onNewChat }) {
           <li key={index}>{item}</li>
         ))}
       </ul>
+      <button 
+        id="settings-button-sidebar" 
+        onClick={() => setShowSettings(true)}
+      >
+        <i className="fas fa-cog"></i>
+      </button>
     </div>
   );
 }

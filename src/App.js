@@ -15,16 +15,26 @@ function App() {
     setSessionId(Date.now()); // Generate a new session ID
   };
 
+  const handleSignIn = () => {
+    // Implement sign-in functionality here
+    console.log("Sign in clicked");
+  };
+
   return (
     <div className="app">
-      <Sidebar history={history} onNewChat={handleNewChat} />
+      <Sidebar 
+        history={history} 
+        onNewChat={handleNewChat} 
+        showSettings={showSettings}
+        setShowSettings={setShowSettings}
+      />
       <div className="chat-container">
-        <h1>ContextSync-BucBuddy</h1>
+        <h1>BucBuddy</h1>
         <button 
-          id="settings-button" 
-          onClick={() => setShowSettings(true)}
+          id="signin-button" 
+          onClick={handleSignIn}
         >
-          <i className="fas fa-cog"></i>
+          <i className="fas fa-sign-in-alt"></i>
         </button>
         {showSettings && (
           <SettingsModal 

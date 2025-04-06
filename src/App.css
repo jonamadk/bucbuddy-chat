@@ -48,6 +48,7 @@ h2 {
     border-radius: 5px;
     padding: 10px;
     cursor: pointer;
+    display: none; /* Hide the old button */
 }
 
 #settings-button i {
@@ -101,6 +102,7 @@ h2 {
     box-shadow: 0 0 10px rgba(159, 206, 237, 0.2);
     padding: 20px;
     overflow-y: auto;
+    position: relative; /* Add this to position the settings button */
 }
 
 #sidebar h2 {
@@ -121,6 +123,50 @@ h2 {
 
 #sidebar ul li:hover {
     background-color: rgb(198, 219, 240);
+}
+
+#settings-button-sidebar {
+    position: absolute;
+    bottom: 20px;
+    left: 105px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#settings-button-sidebar:hover {
+    background-color: #0056b3;
+}
+
+#settings-button-sidebar i {
+    font-size: 16px;
+}
+
+#signin-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+#signin-button:hover {
+    background-color: #0056b3;
+}
+
+#signin-button i {
+    font-size: 16px;
 }
 
 .chat-container {
