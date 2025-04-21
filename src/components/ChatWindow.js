@@ -12,7 +12,6 @@ function ChatWindow({ setHistory, voiceActivate, sessionId }) {
     setMessages([]); // Clear messages on new session
   }, [sessionId]);
 
-  // Load persisted conversation ID for this session
   useEffect(() => {
     const stored = localStorage.getItem(`conversation_${sessionId}`);
     setConversationId(stored ? parseInt(stored, 10) : null);
@@ -139,9 +138,9 @@ function ChatWindow({ setHistory, voiceActivate, sessionId }) {
             {msg.citations && msg.citations.map((citation, i) => (
               <p key={i} className="citation">
                 <b>Citation:</b>{' '}
-                {Object.entries(citation).map(([name, url]) => (
-                  <a key={name} href={url} target="_blank" rel="noopener noreferrer">{name}</a>
-                ))}
+                <a href={citation.url} target="_blank" rel="noopener noreferrer">
+                  {citation.name}
+                </a>
               </p>
             ))}
           </div>
