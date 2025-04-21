@@ -5,19 +5,34 @@ import ChatWindow from './components/ChatWindow';
 import SettingsModal from './components/SettingsModal';
 
 function App() {
-  const [history, setHistory] = useState(["New Chat"]); // Initialize with "New Chat"
+  // Update history structure to include conversation IDs and titles
+  const [history, setHistory] = useState([{
+    id: Date.now(),
+    title: "New Chat",
+    conversationId: null
+  }]);
+  const [activeChat, setActiveChat] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
   const [voiceActivate, setVoiceActivate] = useState(false);
-  const [sessionId, setSessionId] = useState(Date.now());
 
   const handleNewChat = () => {
-    setHistory((prev) => [...prev, "New Chat"]); // Add "New Chat" to history
-    setSessionId(Date.now()); // Generate a new session ID
+    const newChat = {
+      id: Date.now(),
+      title: "New Chat",
+      conversationId: null
+    };
+    setHistory(prev => [...prev, newChat]);
+    setActiveChat(history.length); // Set active chat to the new chat
   };
 
-  const handleSignIn = () => {
-    // Implement sign-in functionality here
-    console.log("Sign in clicked");
+  const handleChatSelect = (index) => {
+    setActiveChat(index);
+  };
+
+  const updateChatTitle = (index, newTitle) => {
+    setHistory(prev => prev.map((chat, i) => 
+      i === index ? { ...chat, title: newTitle } : chat
+    ));
   };
 
   return (
@@ -27,13 +42,12 @@ function App() {
         onNewChat={handleNewChat} 
         showSettings={showSettings}
         setShowSettings={setShowSettings}
+        activeChat={activeChat}
+        onChatSelect={handleChatSelect}
       />
       <div className="chat-container">
         <h1>BucBuddy</h1>
-        <button 
-          id="signin-button" 
-          onClick={handleSignIn}
-        >
+        <button id="signin-button" onClick={() => console.log("Sign in clicked")}>
           <i className="fas fa-sign-in-alt"></i>
         </button>
         {showSettings && (
@@ -46,7 +60,9 @@ function App() {
         <ChatWindow 
           setHistory={setHistory}
           voiceActivate={voiceActivate}
-          sessionId={sessionId}
+          activeChat={activeChat}
+          currentChat={history[activeChat]}
+          updateChatTitle={updateChatTitle}
         />
       </div>
     </div>

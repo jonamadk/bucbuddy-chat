@@ -1,7 +1,7 @@
 import React from 'react';
 import NewChatFeature from './NewChatFeature';
 
-function Sidebar({ history, onNewChat, showSettings, setShowSettings }) {
+function Sidebar({ history, onNewChat, showSettings, setShowSettings, activeChat, onChatSelect }) {
   return (
     <div id="sidebar">
       <div className="sidebar-header">
@@ -10,8 +10,14 @@ function Sidebar({ history, onNewChat, showSettings, setShowSettings }) {
       </div>
       <div className="divider"></div>
       <ul id="history-list">
-        {history.map((item, index) => (
-          <li key={index}>{item}</li>
+        {history.map((chat, index) => (
+          <li 
+            key={chat.id}
+            className={activeChat === index ? 'active' : ''}
+            onClick={() => onChatSelect(index)}
+          >
+            {chat.title}
+          </li>
         ))}
       </ul>
       <button 

@@ -1,22 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-function ChatWindow({ setHistory, voiceActivate, sessionId }) {
+function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, updateChatTitle }) {
   const [messages, setMessages] = useState([]);
   const [query, setQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const [conversationId, setConversationId] = useState(null);
   const chatWindowRef = useRef(null);
   const recognitionRef = useRef(null);
 
+  // Load chat history when switching chats
   useEffect(() => {
-    setMessages([]); // Clear messages on new session
-  }, [sessionId]);
+    const loadChatHistory = async () => {
+      if (currentChat.conversationId) {
+        try {
+          const response = await fetch(`http://localhost:8000/conversation/${currentChat.conversationId}/history`);
+          const data = await response.json();
+          
+          if (data.conversation_history) {
+            const formattedMessages = data.conversation_history.map(msg => ([
+              { text: msg.userquery, type: 'user' },
+              { text: msg.llmresponse, type: 'bot' }
+            ])).flat();
+            setMessages(formattedMessages);
+          }
+        } catch (error) {
+          console.error("Error loading chat history:", error);
+          setMessages([]);
+        }
+      } else {
+        setMessages([]); // Clear messages for new chat
+      }
+    };
 
-  // Load persisted conversation ID for this session
-  useEffect(() => {
-    const stored = localStorage.getItem(`conversation_${sessionId}`);
-    setConversationId(stored ? parseInt(stored, 10) : null);
-  }, [sessionId]);
+    loadChatHistory();
+  }, [currentChat.conversationId]);
 
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -41,23 +57,16 @@ function ChatWindow({ setHistory, voiceActivate, sessionId }) {
   }, []);
 
   const sendMessage = async (inputQuery = query) => {
+    if (!inputQuery.trim()) return;
+    
     const userMessage = { text: inputQuery, type: 'user' };
-    setMessages((prev) => [...prev, userMessage]);
-
-    setHistory((prev) => {
-      const updatedHistory = [...prev];
-      if (updatedHistory[updatedHistory.length - 1] === "New Chat") {
-        updatedHistory[updatedHistory.length - 1] = inputQuery;
-      }
-      return updatedHistory;
-    });
-
-    const botMessage = { text: 'Loading...', type: 'bot' };
-    setMessages((prev) => [...prev, botMessage]);
+    setMessages(prev => [...prev, userMessage]);
 
     try {
-      const requestBody = { userquery: inputQuery, conversation_id: conversationId };
-      console.log("Request to server:", requestBody);
+      const requestBody = { 
+        userquery: inputQuery,
+        conversation_id: currentChat.conversationId
+      };
 
       const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
@@ -66,45 +75,34 @@ function ChatWindow({ setHistory, voiceActivate, sessionId }) {
       });
 
       const data = await response.json();
-      console.log("Response from server:", data);
 
-      // Update conversation ID and persist it
-      if (data.conversation_id) {
-        setConversationId(data.conversation_id);
-        localStorage.setItem(`conversation_${sessionId}`, data.conversation_id);
-      } else {
-        console.error("Failed to retrieve conversation_id from server.");
-        alert("An error occurred while starting a new conversation. Please try again.");
+      // Update chat title and conversation ID if this is a new chat
+      if (data.conversation_id && !currentChat.conversationId) {
+        setHistory(prev => prev.map((chat, i) => 
+          i === activeChat 
+            ? { 
+                ...chat, 
+                conversationId: data.conversation_id,
+                title: inputQuery.substring(0, 30) + '...'
+              }
+            : chat
+        ));
       }
 
-      const convKey = String(data.conversation_id);
-      const history = data.conversation_history?.[convKey] || [];
-      const lastTurn = history[history.length - 1] || {};
-      const botText = lastTurn.llmresponse || 'Error fetching response';
+      const botMessage = {
+        text: data.conversation_history[data.conversation_id][0].llmresponse,
+        type: 'bot',
+        citations: data.documents
+      };
 
-      const citations = (data.documents || []).map((doc) => ({
-        name: doc.document_name,
-        url: doc.document_link,
-      }));
+      setMessages(prev => [...prev, botMessage]);
 
-      setMessages((prev) => {
-        const msgs = [...prev];
-        msgs[msgs.length - 1] = { text: botText, type: 'bot', citations };
-        return msgs;
-      });
-
-      if (voiceActivate) {
-        const speech = new SpeechSynthesisUtterance(botText);
-        speech.lang = 'en-US';
-        window.speechSynthesis.speak(speech);
-      }
     } catch (error) {
       console.error("Error during fetch:", error);
-      setMessages((prev) => {
-        const msgs = [...prev];
-        msgs[msgs.length - 1] = { text: 'Error fetching response!', type: 'bot' };
-        return msgs;
-      });
+      setMessages(prev => [...prev, { 
+        text: 'Error fetching response. Please try again.', 
+        type: 'bot' 
+      }]);
     }
     setQuery('');
   };
