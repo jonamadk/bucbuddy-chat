@@ -1,38 +1,61 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, updateChatTitle }) {
+function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, updateChatTitle, history }) {
   const [messages, setMessages] = useState([]);
   const [query, setQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const chatWindowRef = useRef(null);
   const recognitionRef = useRef(null);
 
-  // Load chat history when switching chats
   useEffect(() => {
+    console.log('Current chat updated:', currentChat);
+    console.log('Active chat:', activeChat);
+    console.log('Messages:', messages);
+  }, [currentChat, activeChat, messages]);
+
+  // Load chat history when conversationId changes
+  useEffect(() => {
+    let isMounted = true;
+
     const loadChatHistory = async () => {
-      if (currentChat.conversationId) {
-        try {
-          const response = await fetch(`http://localhost:8000/conversation/${currentChat.conversationId}/history`);
-          const data = await response.json();
-          
-          if (data.conversation_history) {
-            const formattedMessages = data.conversation_history.map(msg => ([
-              { text: msg.userquery, type: 'user' },
-              { text: msg.llmresponse, type: 'bot' }
-            ])).flat();
-            setMessages(formattedMessages);
-          }
-        } catch (error) {
-          console.error("Error loading chat history:", error);
+      // Clear messages to ensure fresh state
+      setMessages([]);
+
+      if (!currentChat?.conversationId) {
+        return;
+      }
+
+      try {
+        console.log('Fetching history for conversationId:', currentChat.conversationId);
+        const response = await fetch(`http://localhost:8000/conversation/${currentChat.conversationId}/history`);
+        if (!response.ok) throw new Error('Failed to fetch history');
+        
+        const data = await response.json();
+        console.log('Fetched history:', data);
+        
+        if (isMounted && data.conversation_history) {
+          const formattedMessages = data.conversation_history.map(msg => ([
+            { text: msg.userquery, type: 'user' },
+            { text: msg.llmresponse, type: 'bot' }
+          ])).flat();
+          setMessages(formattedMessages);
+        }
+      } catch (error) {
+        console.error("Error loading chat history:", error);
+        if (isMounted) {
           setMessages([]);
         }
-      } else {
-        setMessages([]); // Clear messages for new chat
       }
     };
 
     loadChatHistory();
-  }, [currentChat.conversationId]);
+
+    // Cleanup to prevent race conditions
+    return () => {
+      isMounted = false;
+    };
+  }, [currentChat?.conversationId]);
 
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -50,24 +73,29 @@ function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, update
 
       recognitionRef.current.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
-        setQuery(''); // Clear the typing box
-        sendMessage(transcript); // Automatically send the captured word
+        setQuery('');
+        sendMessage(transcript);
       };
     }
   }, []);
 
   const sendMessage = async (inputQuery = query) => {
-    if (!inputQuery.trim()) return;
-    
+    if (!inputQuery.trim() || isLoading) return;
+
+    setIsLoading(true);
     const userMessage = { text: inputQuery, type: 'user' };
     setMessages(prev => [...prev, userMessage]);
+    setQuery('');
 
     try {
+      let conversationId = currentChat?.conversationId || null;
+
       const requestBody = { 
         userquery: inputQuery,
-        conversation_id: currentChat.conversationId
+        conversation_id: conversationId
       };
 
+      console.log('Sending message:', { conversationId, userquery: inputQuery });
       const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -75,36 +103,44 @@ function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, update
       });
 
       const data = await response.json();
+      console.log('Full response data:', JSON.stringify(data, null, 2));
 
-      // Update chat title and conversation ID if this is a new chat
-      if (data.conversation_id && !currentChat.conversationId) {
+      if (data.conversation_id && !conversationId) {
         setHistory(prev => prev.map((chat, i) => 
           i === activeChat 
-            ? { 
-                ...chat, 
-                conversationId: data.conversation_id,
-                title: inputQuery.substring(0, 30) + '...'
-              }
+            ? { ...chat, conversationId: data.conversation_id, title: inputQuery.substring(0, 30) + '...' }
             : chat
         ));
+        conversationId = data.conversation_id;
       }
 
-      const botMessage = {
-        text: data.conversation_history[data.conversation_id][0].llmresponse,
-        type: 'bot',
-        citations: data.documents
-      };
+      const responseId = data.conversation_id || conversationId;
+      if (!data.conversation_history || !responseId) {
+        throw new Error('Invalid response data');
+      }
 
-      setMessages(prev => [...prev, botMessage]);
+      // Get the latest response (last item in the history, assuming chronological order)
+      const latestResponse = data.conversation_history[responseId]?.slice(-1)[0];
+      if (latestResponse?.llmresponse) {
+        const botMessage = {
+          text: latestResponse.llmresponse,
+          type: 'bot',
+          citations: data.documents || []
+        };
+        setMessages(prev => [...prev, botMessage]);
+      } else {
+        throw new Error('No valid response received');
+      }
 
     } catch (error) {
       console.error("Error during fetch:", error);
       setMessages(prev => [...prev, { 
-        text: 'Error fetching response. Please try again.', 
+        text: 'Error fetching response. Please try again.',
         type: 'bot' 
       }]);
+    } finally {
+      setIsLoading(false);
     }
-    setQuery('');
   };
 
   const handleKeyDown = (e) => {

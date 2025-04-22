@@ -63,6 +63,7 @@ function App() {
           activeChat={activeChat}
           currentChat={history[activeChat]}
           updateChatTitle={updateChatTitle}
+          history={history} // <-- add this
         />
       </div>
     </div>
