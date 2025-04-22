@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
@@ -12,13 +13,12 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [voiceActivate, setVoiceActivate] = useState(false);
   const [sessionId, setSessionId] = useState(Date.now());
-  const [user, setUser] = useState(null); // State to store user info
-  const [showSignOut, setShowSignOut] = useState(false); // State to toggle sign-out option
-  const [message, setMessage] = useState(''); // State to show success messages
+  const [user, setUser] = useState(null);
+  const [showSignOut, setShowSignOut] = useState(false);
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Retrieve user info from local storage on app load
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -32,14 +32,13 @@ function App() {
 
   const handleSignInClick = () => {
     if (user) {
-      // Toggle the sign-out option if the user is already signed in
       setShowSignOut((prev) => !prev);
     } else {
-      // Navigate to the sign-in page if the user is not signed in
       navigate('/signin');
     }
   };
 
+  
   const handleSignOut = async () => {
     try {
       const response = await fetch('http://localhost:8000/api/logout', {
@@ -74,8 +73,11 @@ function App() {
     }
   };
 
+
+
+
   const handleLoginSuccess = (userData) => {
-    setUser(userData); // Update the user state dynamically
+    setUser(userData);
   };
 
   return (
@@ -88,9 +90,9 @@ function App() {
           path="/"
           element={
             <>
-              <Sidebar 
-                history={history} 
-                onNewChat={handleNewChat} 
+              <Sidebar
+                history={history}
+                onNewChat={handleNewChat}
                 showSettings={showSettings}
                 setShowSettings={setShowSettings}
               />
@@ -100,15 +102,12 @@ function App() {
                   {user ? (
                     <>
                       <span className="user-name">Hi, {user.firstname}</span>
-                      <button 
-                        id="signin-button" 
-                        onClick={handleSignInClick}
-                      >
+                      <button id="signin-button" onClick={handleSignInClick}>
                         <i className="fas fa-sign-in-alt"></i>
                       </button>
                       {showSignOut && (
-                        <button 
-                          id="signout-button" 
+                        <button
+                          id="signout-button"
                           onClick={handleSignOut}
                           className="signout-button"
                         >
@@ -117,22 +116,19 @@ function App() {
                       )}
                     </>
                   ) : (
-                    <button 
-                      id="signin-button" 
-                      onClick={handleSignInClick}
-                    >
+                    <button id="signin-button" onClick={handleSignInClick}>
                       <i className="fas fa-sign-in-alt"></i>
                     </button>
                   )}
                 </div>
                 {showSettings && (
-                  <SettingsModal 
+                  <SettingsModal
                     voiceActivate={voiceActivate}
                     setVoiceActivate={setVoiceActivate}
                     onClose={() => setShowSettings(false)}
                   />
                 )}
-                <ChatWindow 
+                <ChatWindow
                   setHistory={setHistory}
                   voiceActivate={voiceActivate}
                   sessionId={sessionId}

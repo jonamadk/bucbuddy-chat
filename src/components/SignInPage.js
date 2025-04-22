@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// src/components/SignInPage.js
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SignInPage.css';
 
@@ -9,6 +10,26 @@ function SignInPage({ onLoginSuccess }) {
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
+  // Handle Google OAuth redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const userData = params.get('user');
+    const token = params.get('token');
+
+    if (userData && token) {
+      try {
+        const parsedUser = JSON.parse(decodeURIComponent(userData));
+        localStorage.setItem('access_token', token);
+        localStorage.setItem('user', JSON.stringify(parsedUser));
+        onLoginSuccess(parsedUser);
+        navigate('/', { replace: true });
+      } catch (err) {
+        console.error('OAuth redirect error:', err);
+      }
+    }
+  }, [onLoginSuccess, navigate]);
+
+  // Handle email/password login
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -26,13 +47,9 @@ function SignInPage({ onLoginSuccess }) {
       if (response.ok) {
         localStorage.setItem('access_token', data.access_token);
         localStorage.setItem('user', JSON.stringify(data.user));
-
         setSuccessMessage('Login successful!');
         onLoginSuccess(data.user);
-
-        setTimeout(() => {
-          navigate('/');
-        }, 1000);
+        setTimeout(() => navigate('/'), 1000);
       } else {
         setError(data.error || 'Login failed. Please try again.');
       }
@@ -42,8 +59,8 @@ function SignInPage({ onLoginSuccess }) {
     }
   };
 
+  // Redirect to Flask OAuth route
   const handleGoogleLogin = () => {
-    // Redirect the user to the server's Google login endpoint
     window.location.href = 'http://localhost:8000/api/auth/login';
   };
 
@@ -72,9 +89,7 @@ function SignInPage({ onLoginSuccess }) {
       <p className="signup-text">
         Don't have an account? <a href="/signup" className="signup-link">Sign up</a>
       </p>
-      <div className="divider">
-        <span>OR</span>
-      </div>
+      <div className="divider"><span>OR</span></div>
       <button className="google-signin" onClick={handleGoogleLogin}>
         <i className="fab fa-google"></i> Continue with Google
       </button>
