@@ -4,11 +4,17 @@ function ChatWindow({ setHistory, voiceActivate, sessionId }) {
   const [messages, setMessages] = useState([]);
   const [query, setQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [conversationId, setConversationId] = useState(null);
   const chatWindowRef = useRef(null);
   const recognitionRef = useRef(null);
 
   useEffect(() => {
     setMessages([]); // Clear messages on new session
+  }, [sessionId]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(`conversation_${sessionId}`);
+    setConversationId(stored ? parseInt(stored, 10) : null);
   }, [sessionId]);
 
   useEffect(() => {
@@ -39,7 +45,6 @@ function ChatWindow({ setHistory, voiceActivate, sessionId }) {
 
     setHistory((prev) => {
       const updatedHistory = [...prev];
-      // Update the last "New Chat" entry with the first query
       if (updatedHistory[updatedHistory.length - 1] === "New Chat") {
         updatedHistory[updatedHistory.length - 1] = inputQuery;
       }
@@ -50,36 +55,57 @@ function ChatWindow({ setHistory, voiceActivate, sessionId }) {
     setMessages((prev) => [...prev, botMessage]);
 
     try {
+      const requestBody = { userquery: inputQuery, conversation_id: conversationId };
+      console.log("Request to server:", requestBody);
+
       const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: inputQuery, sessionId }),
+        body: JSON.stringify(requestBody),
       });
+
       const data = await response.json();
+      console.log("Response from server:", data);
+
+      // Update conversation ID and persist it
+      if (data.conversation_id) {
+        setConversationId(data.conversation_id);
+        localStorage.setItem(`conversation_${sessionId}`, data.conversation_id);
+      } else {
+        console.error("Failed to retrieve conversation_id from server.");
+        alert("An error occurred while starting a new conversation. Please try again.");
+      }
+
+      const convKey = String(data.conversation_id);
+      const history = data.conversation_history?.[convKey] || [];
+      const lastTurn = history[history.length - 1] || {};
+      const botText = lastTurn.llmresponse || 'Error fetching response';
+
+      const citations = (data.documents || []).map((doc) => ({
+        name: doc.document_name,
+        url: doc.document_link,
+      }));
 
       setMessages((prev) => {
-        const newMessages = [...prev];
-        newMessages[newMessages.length - 1] = {
-          text: data.response || 'Error fetching response',
-          type: 'bot',
-          citations: data.citation_data || [],
-        };
-        return newMessages;
+        const msgs = [...prev];
+        msgs[msgs.length - 1] = { text: botText, type: 'bot', citations };
+        return msgs;
       });
 
       if (voiceActivate) {
-        const speech = new SpeechSynthesisUtterance(data.response);
+        const speech = new SpeechSynthesisUtterance(botText);
         speech.lang = 'en-US';
         window.speechSynthesis.speak(speech);
       }
     } catch (error) {
+      console.error("Error during fetch:", error);
       setMessages((prev) => {
-        const newMessages = [...prev];
-        newMessages[newMessages.length - 1] = { text: 'Error fetching response!', type: 'bot' };
-        return newMessages;
+        const msgs = [...prev];
+        msgs[msgs.length - 1] = { text: 'Error fetching response!', type: 'bot' };
+        return msgs;
       });
     }
-    setQuery(''); // Clear the typing box after sending
+    setQuery('');
   };
 
   const handleKeyDown = (e) => {
@@ -112,9 +138,9 @@ function ChatWindow({ setHistory, voiceActivate, sessionId }) {
             {msg.citations && msg.citations.map((citation, i) => (
               <p key={i} className="citation">
                 <b>Citation:</b>{' '}
-                {Object.entries(citation).map(([name, url]) => (
-                  <a key={name} href={url} target="_blank" rel="noopener noreferrer">{name}</a>
-                ))}
+                <a href={citation.url} target="_blank" rel="noopener noreferrer">
+                  {citation.name}
+                </a>
               </p>
             ))}
           </div>
