@@ -3,67 +3,95 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh; /* Full viewport height */
-  width: 100%; /* Full viewport width */
+  min-height: 100vh;
+  background-color: #f4f4f9;
   padding: 20px;
-  background-color: #ffffff;
-  font-family: Arial, sans-serif;
-  box-sizing: border-box; /* Ensure padding is included in width/height */
 }
 
-h1 {
-  font-size: 2rem;
-  margin-bottom: 20px;
+.signin-container h1 {
+  font-size: 2.5rem;
   color: #333;
-  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 600;
 }
 
 .signin-form {
   display: flex;
   flex-direction: column;
-  align-items: center;
   width: 100%;
   max-width: 400px;
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  gap: 15px;
 }
 
 .signin-form input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
+  padding: 12px;
+  font-size: 16px;
   border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 1rem;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.signin-form input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .continue-button {
   width: 100%;
-  padding: 10px;
-  background-color: #28a745;
+  max-width: 400px;
+  background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 5px;
-  font-size: 1rem;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .continue-button:hover {
-  background-color: #218838;
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.success-message {
+  color: #28a745;
+  font-size: 14px;
+  margin-top: 15px;
+  text-align: center;
+  padding: 10px;
+  background-color: #e6f4ea;
+  border-radius: 5px;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 14px;
+  margin-top: 15px;
+  text-align: center;
+  padding: 10px;
+  background-color: #f8d7da;
+  border-radius: 5px;
 }
 
 .signup-text {
-  margin-top: 10px;
-  font-size: 0.9rem;
-  color: #555;
-  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #333;
 }
 
 .signup-link {
   color: #007bff;
   text-decoration: none;
+  font-weight: 500;
 }
 
 .signup-link:hover {
@@ -71,20 +99,17 @@ h1 {
 }
 
 .divider {
+  margin: 25px 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin: 20px 0;
   width: 100%;
   max-width: 400px;
-  position: relative;
 }
 
 .divider span {
-  background-color: #ffffff;
-  padding: 0 10px;
+  margin: 0 15px;
   color: #555;
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 
 .divider::before,
@@ -92,93 +117,49 @@ h1 {
   content: '';
   flex: 1;
   height: 1px;
-  background-color: #ddd;
+  background-color: #ccc;
 }
 
 .google-signin {
+  width: 100%;
+  max-width: 400px;
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  max-width: 400px;
-  padding: 10px;
-  background-color: #4285f4;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.google-signin i {
-  margin-right: 10px;
+  gap: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .google-signin:hover {
-  background-color: #357ae8;
+  background-color: #f8f8f8;
+  transform: translateY(-2px);
 }
 
-.error-message {
-  color: red;
-  margin-top: 10px;
-  font-size: 0.9rem;
-  text-align: center;
+.google-signin i {
+  font-size: 18px;
 }
 
-.success-message {
-  color: green;
-  margin-top: 10px;
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .signin-container {
-    padding: 10px;
-  }
-
-  h1 {
-    font-size: 1.5rem;
+/* Responsive Design */
+@media (max-width: 600px) {
+  .signin-container h1 {
+    font-size: 2rem;
   }
 
   .signin-form {
-    padding: 15px;
+    max-width: 100%;
+    padding: 0 15px;
   }
 
-  .signin-form input {
-    font-size: 0.9rem;
-    padding: 8px;
-  }
-
-  .continue-button {
-    font-size: 0.9rem;
-    padding: 8px;
-  }
-
+  .continue-button,
   .google-signin {
-    font-size: 0.9rem;
-    padding: 8px;
-  }
-}
-
-@media (max-width: 480px) {
-  h1 {
-    font-size: 1.2rem;
-  }
-
-  .signin-form input {
-    font-size: 0.8rem;
-    padding: 6px;
-  }
-
-  .continue-button {
-    font-size: 0.8rem;
-    padding: 6px;
-  }
-
-  .google-signin {
-    font-size: 0.8rem;
-    padding: 6px;
+    max-width: 100%;
   }
 }

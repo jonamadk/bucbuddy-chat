@@ -17,6 +17,16 @@ function SignUpPage() {
     setError('');
     setSuccessMessage('');
 
+    // Client-side validation
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
+      return;
+    }
+
     try {
       const response = await fetch('http://localhost:8000/api/register', {
         method: 'POST',
@@ -31,17 +41,18 @@ function SignUpPage() {
       });
 
       const data = await response.json();
+      console.log('Register response:', JSON.stringify(data, null, 2));
 
       if (response.ok) {
         setSuccessMessage('Registration successful! Redirecting to login...');
         setTimeout(() => {
-          navigate('/signin'); // Redirect to the sign-in page
+          navigate('/signin');
         }, 2000);
       } else {
         setError(data.error || 'Registration failed. Please try again.');
       }
     } catch (err) {
-      console.error('Error during registration:', err);
+      console.error('Error during registration:', err.message, err.stack);
       setError('An error occurred. Please try again later.');
     }
   };

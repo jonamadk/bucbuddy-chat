@@ -1,4 +1,4 @@
-# Use official Node.js image as base
+# Use Node.js 16 as the base image
 FROM node:16
 
 # Set working directory
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json .
 RUN npm install
 
-# Copy the rest of the application
+# Copy public and src directories
 COPY ./public ./public
 COPY ./src ./src
 
@@ -18,8 +18,8 @@ RUN npm run build
 # Install serve to run the built app
 RUN npm install -g serve
 
-# Expose port
+# Expose port 3000
 EXPOSE 3000
 
-# Start the application
+# Serve the built app
 CMD ["serve", "-s", "build", "-l", "3000"]
