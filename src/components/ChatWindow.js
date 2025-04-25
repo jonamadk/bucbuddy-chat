@@ -117,7 +117,7 @@ function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, update
 
       // Retry with unauthenticated endpoint if CORS or auth fails
       if (!response.ok && accessToken) {
-        console.warn('Authenticated chat failed, retrying with unauthenticated endpoint');
+        console.warn('Authenticated chat failed, retrying with unauthenticated endpoint...');
         endpoint = '/api/chat';
         response = await fetch(`http://localhost:8000${endpoint}`, {
           method: 'POST',
