@@ -48,7 +48,7 @@ function SignInPage({ onLoginSuccess }) {
         localStorage.setItem('access_token', data.access_token);
         localStorage.setItem('user', JSON.stringify(data.user));
         setSuccessMessage('Login successful!');
-        onLoginSuccess(data.user);
+        onLoginSuccess(data.user); // Notify App of successful login
         setTimeout(() => navigate('/'), 1000);
       } else {
         setError(data.error || 'Login failed. Please try again.');
