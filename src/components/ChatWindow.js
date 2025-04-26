@@ -23,6 +23,7 @@ function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, update
       setMessages([]);
 
       if (!currentChat?.conversationId) {
+        console.log('No conversationId, skipping history fetch');
         return;
       }
 
@@ -48,7 +49,7 @@ function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, update
         if (isMounted && data.conversation_history) {
           const formattedMessages = data.conversation_history.map(msg => ([
             { text: msg.userquery, type: 'user' },
-            { text: msg.llmresponse, type: 'bot' }
+            { text: msg.llmresponse, type: 'bot', citations: data.documents || [] }
           ])).flat();
           setMessages(formattedMessages);
         }
@@ -73,13 +74,8 @@ function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, update
       recognitionRef.current.continuous = false;
       recognitionRef.current.lang = 'en-US';
 
-      recognitionRef.current.onstart = () => {
-        setIsListening(true);
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
+      recognitionRef.current.onstart = () => setIsListening(true);
+      recognitionRef.current.onend = () => setIsListening(false);
 
       recognitionRef.current.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
@@ -98,32 +94,24 @@ function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, update
     setQuery('');
 
     try {
-      let conversationId = currentChat?.conversationId || null;
-      const requestBody = { 
+      const requestBody = {
         userquery: inputQuery,
-        conversation_id: conversationId
+        conversation_id: currentChat?.conversationId || null
       };
 
-      console.log('Sending message:', { conversationId, userquery: inputQuery });
-      let endpoint = accessToken ? '/api/auth/chat' : '/api/chat';
-      let response = await fetch(`http://localhost:8000${endpoint}`, {
+      console.log('Sending message:', { conversationId: requestBody.conversation_id, userquery: inputQuery });
+      const endpoint = accessToken ? '/api/auth/chat' : '/api/chat';
+      const response = await fetch(`http://localhost:8000${endpoint}`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
         },
         body: JSON.stringify(requestBody),
       });
 
-      // Retry with unauthenticated endpoint if CORS or auth fails
-      if (!response.ok && accessToken) {
-        console.warn('Authenticated chat failed, retrying with unauthenticated endpoint...');
-        endpoint = '/api/chat';
-        response = await fetch(`http://localhost:8000${endpoint}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody),
-        });
+      if (!response.ok) {
+        throw new Error(`Failed to send message: ${response.status} ${response.statusText}`);
       }
 
       const contentType = response.headers.get('content-type');
@@ -135,17 +123,17 @@ function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, update
       const data = await response.json();
       console.log('Full response data:', JSON.stringify(data, null, 2));
 
-      if (!response.ok) {
-        throw new Error(data.error || `Failed to send message: ${response.status} ${response.statusText}`);
+      if (data.error) {
+        throw new Error(data.error);
       }
 
-      if (data.conversation_id && !conversationId) {
+      // Handle new conversation
+      if (data.conversation_id && !requestBody.conversation_id) {
         const newChat = {
           id: data.conversation_id,
           title: inputQuery.substring(0, 30) + '...',
           conversationId: data.conversation_id
         };
-        // Replace the default chat entry if it exists, otherwise append
         setHistory(prev => {
           if (prev.length === 0 || (prev.length === 1 && prev[0].conversationId === null)) {
             return [newChat];
@@ -153,11 +141,10 @@ function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, update
           return [...prev.filter(chat => chat.conversationId !== null), newChat];
         });
         updateChatTitle(activeChat, inputQuery.substring(0, 30) + '...');
-        setActiveChat(history.length > 0 ? history.length : 0); // Select the new conversation
-        conversationId = data.conversation_id;
+        onChatSelect(history.length); // Select the new conversation
       }
 
-      const responseId = data.conversation_id || conversationId;
+      const responseId = data.conversation_id || requestBody.conversation_id;
       if (!data.conversation_history || !responseId) {
         throw new Error('Invalid response data');
       }
@@ -187,10 +174,7 @@ function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, update
       } else if (error.message.includes('Expected JSON response')) {
         errorMessage = 'Server returned an unexpected response. Please try again or contact support.';
       }
-      setMessages(prev => [...prev, { 
-        text: errorMessage,
-        type: 'bot' 
-      }]);
+      setMessages(prev => [...prev, { text: errorMessage, type: 'bot' }]);
     } finally {
       setIsLoading(false);
     }
@@ -211,57 +195,60 @@ function ChatWindow({ setHistory, voiceActivate, currentChat, activeChat, update
     }
   };
 
-  useEffect(() => {
-    if (chatWindowRef.current) {
-      chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
-    }
-  }, [messages]);
-
   return (
     <div className="chat-window-wrapper">
       <div id="chat-window" ref={chatWindowRef}>
         {messages.map((msg, index) => (
           <div key={index} className={`message ${msg.type}-message`}>
             <span>{msg.text}</span>
-            {msg.citations && msg.citations.map((citation, i) => (
-              <p key={i} className="citation">
-                <b>Citation:</b>{' '}
-                <a
-                  href={citation.document_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {citation.document_name}
-                </a>
-              </p>
-            ))}
+            {msg.citations && msg.citations.length > 0 && (
+              <div className="citations">
+                {msg.citations.map((citation, i) => (
+                  <p key={i} className="citation">
+                    {i + 1}. Source: <a href={citation.document_link} target="_blank" rel="noopener noreferrer">{citation.document_name}</a>
+                  </p>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
       <form id="chat-form" onSubmit={(e) => { e.preventDefault(); if (query.trim()) sendMessage(); }}>
-        <div className="input-container">
-          <textarea
-            id="query"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message here..."
-            required
-            disabled={isLoading}
-          />
-          <div className="button-container">
-            <button
-              type="button"
-              id="mic-button"
-              onClick={toggleMic}
-              disabled={!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) || isLoading}
-              className={isListening ? 'listening' : ''}
-            >
-              <i className="fas fa-microphone"></i>
-            </button>
-            <button type="submit" id="send-button" disabled={isLoading}>
-              <i className="fas fa-paper-plane"></i>
-            </button>
+        <div className="input-wrapper">
+          <div className="input-box">
+            <textarea
+              id="query"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type your message here..."
+              required
+              disabled={isLoading}
+            />
+            <div className="button-group">
+              {('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) && (
+                <button
+                  type="button"
+                  id="mic-button"
+                  onClick={toggleMic}
+                  disabled={isLoading}
+                  className={isListening ? 'listening' : ''}
+                  title={isListening ? 'Stop recording' : 'Start recording'}
+                  aria-label={isListening ? 'Stop recording' : 'Start recording'}
+                >
+                  <i className="fas fa-microphone"></i>
+                </button>
+              )}
+              <button
+                type="submit"
+                id="send-button"
+                disabled={isLoading}
+                title="Send message"
+                aria-label="Send message"
+              >
+                <i className="fas fa-paper-plane"></i>
+              </button>
+            </div>
           </div>
         </div>
       </form>
