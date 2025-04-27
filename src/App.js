@@ -7,7 +7,6 @@ import Footer from './components/Footer';
 import SignInPage from './components/SignInPage';
 import SignUpPage from './components/SignUpPage';
 
-// eslint-disable-next-line react/prop-types
 class ErrorBoundary extends Component {
   state = { hasError: false, error: null };
 
@@ -34,27 +33,24 @@ function App() {
   const [activeChat, setActiveChat] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
-  const [theme, setTheme] = useState('light'); // State for theme
+  const [theme, setTheme] = useState('light');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Apply theme to the body element
   useEffect(() => {
-    document.body.className = theme; // Dynamically set the theme class on the body
+    document.body.className = theme;
   }, [theme]);
 
-  // Toggle theme between light and dark
   const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  // Fetch user chat history on login
   useEffect(() => {
     const fetchUserHistory = async () => {
       if (!user || !localStorage.getItem('access_token')) {
         setHistory([]);
         return;
       }
-
       try {
         const response = await fetch('http://localhost:8000/api/auth/conversations', {
           headers: {
@@ -62,31 +58,27 @@ function App() {
             'Content-Type': 'application/json'
           }
         });
-        if (!response.ok) throw new Error(`Failed to fetch conversations: ${response.status} ${response.statusText}`);
+        if (!response.ok) throw new Error(`Failed to fetch conversations: ${response.status}`);
         const data = await response.json();
-        console.log('Fetched user history:', JSON.stringify(data, null, 2));
-
         if (data.conversations && Array.isArray(data.conversations)) {
-          const formattedHistory = data.conversations.map(conv => ({
+          const formatted = data.conversations.map(conv => ({
             id: conv.conversationId,
             title: conv.title || 'New Chat',
             conversationId: conv.conversationId
           }));
-          setHistory(formattedHistory);
-          setActiveChat(formattedHistory.length > 0 ? 0 : 0);
+          setHistory(formatted);
+          setActiveChat(formatted.length > 0 ? 0 : 0);
         } else {
           setHistory([]);
         }
       } catch (error) {
-        console.error('Error fetching user history:', error.message, error.stack);
+        console.error('Error fetching history:', error);
         setHistory([]);
       }
     };
-
     fetchUserHistory();
   }, [user]);
 
-  // Ensure a default "New Chat" window exists for both logged-in and guest users
   useEffect(() => {
     if (history.length === 0) {
       const defaultChat = {
@@ -97,7 +89,7 @@ function App() {
       setHistory([defaultChat]);
       setActiveChat(0);
     }
-  }, [history]); // Run whenever history changes
+  }, [history]);
 
   const handleNewChat = () => {
     const newChat = {
@@ -105,60 +97,43 @@ function App() {
       title: 'New Chat',
       conversationId: null
     };
-    setHistory(prev => [newChat, ...prev]); // Prepend new chat
-    setActiveChat(0); // Select the new chat (index 0)
+    setHistory(prev => [newChat, ...prev]);
+    setActiveChat(0);
   };
 
   const handleChatSelect = (index) => {
-    console.log('Selecting chat at index:', index);
     setActiveChat(index);
+    setIsMobileSidebarOpen(false);
   };
 
   const updateChatTitle = (index, newTitle) => {
-    setHistory(prev => prev.map((chat, i) => 
+    setHistory(prev => prev.map((chat, i) =>
       i === index ? { ...chat, title: newTitle } : chat
     ));
   };
 
-  const handleSignIn = () => {
-    navigate('/signin');
-  };
+  const handleSignIn = () => navigate('/signin');
 
   const handleSignOut = async () => {
-    const accessToken = localStorage.getItem('access_token');
-    if (accessToken) {
-      try {
-        const response = await fetch('http://localhost:8000/api/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        if (!response.ok) {
-          throw new Error(`Logout failed: ${response.status} ${response.statusText}`);
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      await fetch('http://localhost:8000/api/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-        const data = await response.json();
-        console.log('Logout response:', data);
-        alert('You have been logged out successfully.');
-      } catch (error) {
-        console.error('Error during logout:', error.message, error.stack);
-      }
+      }).catch(console.error);
     }
-
-    // Clear local state and storage
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user');
+    localStorage.clear();
     setUser(null);
     setHistory([]);
     setActiveChat(0);
-    console.log('Sign out completed');
     navigate('/signin');
   };
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
-    console.log('Login successful, user:', userData);
   };
 
   return (
@@ -170,15 +145,17 @@ function App() {
               path="/"
               element={
                 <>
-                  <Sidebar 
-                    history={history} 
-                    onNewChat={handleNewChat} 
+                  <Sidebar
+                    history={history}
+                    onNewChat={handleNewChat}
                     showSettings={showSettings}
                     setShowSettings={setShowSettings}
                     activeChat={activeChat}
                     onChatSelect={handleChatSelect}
-                    toggleTheme={toggleTheme} 
-                    theme={theme} // Pass the theme state
+                    toggleTheme={toggleTheme}
+                    theme={theme}
+                    isMobileSidebarOpen={isMobileSidebarOpen}
+                    setIsMobileSidebarOpen={setIsMobileSidebarOpen}
                   />
                   <div className="chat-container">
                     <h1>
@@ -197,13 +174,9 @@ function App() {
                         </button>
                       )}
                     </div>
-                    <ChatWindow 
+                    <ChatWindow
                       setHistory={setHistory}
-                      currentChat={history[activeChat] || {
-                        id: Date.now(),
-                        title: 'New Chat',
-                        conversationId: null
-                      }}
+                      currentChat={history[activeChat]}
                       activeChat={activeChat}
                       updateChatTitle={updateChatTitle}
                       history={history}
