@@ -177,7 +177,8 @@ function App() {
                     setShowSettings={setShowSettings}
                     activeChat={activeChat}
                     onChatSelect={handleChatSelect}
-                    toggleTheme={toggleTheme} // Pass toggleTheme to Sidebar
+                    toggleTheme={toggleTheme} 
+                    theme={theme} // Pass the theme state
                   />
                   <div className="chat-container">
                     <h1>

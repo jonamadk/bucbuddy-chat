@@ -538,7 +538,7 @@ body.dark #signout-button:hover {
   background-color: #555; /* Slightly lighter background on hover */
 
 /* Responsive Design */
-  @media (max-width: 900px) {
+@media (max-width: 900px) {
     .app {
       flex-direction: column;
     }

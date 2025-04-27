@@ -1,7 +1,9 @@
 import React from 'react';
 import NewChatFeature from './NewChatFeature';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
 
-function Sidebar({ history, onNewChat, showSettings, setShowSettings, activeChat, onChatSelect, toggleTheme }) {
+function Sidebar({ history, onNewChat, showSettings, setShowSettings, activeChat, onChatSelect, toggleTheme, theme }) {
   return (
     <div id="sidebar">
       <div className="sidebar-header">
@@ -25,7 +27,10 @@ function Sidebar({ history, onNewChat, showSettings, setShowSettings, activeChat
         onClick={toggleTheme}
         aria-label="Toggle Theme"
       >
-        <i className="fas fa-moon"></i>
+        <FontAwesomeIcon 
+          icon={theme === 'light' ? faMoon : faSun} 
+          style={{ fontSize: '1.5rem' }} // Set icon size to 1.5x
+        />
       </button>
     </div>
   );
