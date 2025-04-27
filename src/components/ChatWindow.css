@@ -151,6 +151,33 @@
   align-self: flex-start;
 }
 
+.message-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.voice-button,
+.copy-button {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: #666;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.voice-button:hover,
+.copy-button:hover {
+  background-color: #f0f0f0;
+}
+
+.copy-button.copied {
+  color: #4CAF50;
+}
+
 @media (max-width: 600px) {
   #chat-window {
     height: calc(100vh - 220px);

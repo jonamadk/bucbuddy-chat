@@ -213,6 +213,23 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
     }
   };
 
+  // Copy to clipboard function
+  const handleCopy = async (text, index) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // Optional: Show visual feedback
+      const copyButton = document.querySelector(`#copy-button-${index}`);
+      copyButton.classList.add('copied');
+      copyButton.innerHTML = '<i class="fas fa-check"></i>';
+      setTimeout(() => {
+        copyButton.classList.remove('copied');
+        copyButton.innerHTML = '<i class="fas fa-copy"></i>';
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+    }
+  };
+
   return (
     <div className="chat-window-wrapper">
       <div id="chat-window" ref={chatWindowRef}>
@@ -220,20 +237,33 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
           <div key={idx} className={`message ${msg.type}-message`}>
             <span>{msg.text}</span>
             {msg.type === 'bot' && (
-              <button
-                className="voice-button"
-                onClick={() => toggleSpeak(idx, msg.text)}
-                title={speakingMessageIndex === idx ? 'Stop reading' : 'Read aloud'}
-                aria-label={speakingMessageIndex === idx ? 'Stop reading' : 'Read aloud'}
-              >
-                <i className={`fas ${speakingMessageIndex === idx ? 'fa-stop' : 'fa-volume-up'}`}></i>
-              </button>
+              <div className="message-actions">
+                <button
+                  className="voice-button"
+                  onClick={() => toggleSpeak(idx, msg.text)}
+                  title={speakingMessageIndex === idx ? 'Stop reading' : 'Read aloud'}
+                  aria-label={speakingMessageIndex === idx ? 'Stop reading' : 'Read aloud'}
+                >
+                  <i className={`fas ${speakingMessageIndex === idx ? 'fa-stop' : 'fa-volume-up'}`}></i>
+                </button>
+                <button
+                  id={`copy-button-${idx}`}
+                  className="copy-button"
+                  onClick={() => handleCopy(msg.text, idx)}
+                  title="Copy to clipboard"
+                  aria-label="Copy to clipboard"
+                >
+                  <i className="fas fa-copy"></i>
+                </button>
+              </div>
             )}
             {msg.citations && msg.citations.length > 0 && (
               <div className="citations">
                 {msg.citations.map((citation, i) => (
                   <p key={i} className="citation">
-                    {i + 1}. Source: <a href={citation.document_link} target="_blank" rel="noopener noreferrer">{citation.document_name}</a>
+                    {i + 1}. Source: <a href={citation.document_link} target="_blank" rel="noopener noreferrer">
+                      {citation.document_name}
+                    </a>
                   </p>
                 ))}
               </div>

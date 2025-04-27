@@ -3,7 +3,7 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
-import SettingsModal from './components/SettingsModal';
+import Footer from './components/Footer';
 import SignInPage from './components/SignInPage';
 import SignUpPage from './components/SignUpPage';
 
@@ -75,6 +75,19 @@ function App() {
     fetchUserHistory();
   }, [user]);
 
+  // Initialize with a default chat
+  useEffect(() => {
+    if (history.length === 0) {
+      const defaultChat = {
+        id: Date.now(),
+        title: 'New Chat',
+        conversationId: null
+      };
+      setHistory([defaultChat]);
+      setActiveChat(0);
+    }
+  }, []); // Run once on component mount
+
   const handleNewChat = () => {
     const newChat = {
       id: Date.now(),
@@ -138,60 +151,68 @@ function App() {
   };
 
   return (
-    <ErrorBoundary>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <div className="app">
-              <Sidebar 
-                history={history} 
-                onNewChat={handleNewChat} 
-                showSettings={showSettings}
-                setShowSettings={setShowSettings}
-                activeChat={activeChat}
-                onChatSelect={handleChatSelect}
-              />
-              <div className="chat-container">
-                <h1>BucBuddy</h1>
-                <div className="user-info">
-                  <span className="user-name">{user ? user.email : 'Guest'}</span>
-                  {!user ? (
-                    <button id="signin-button" onClick={handleSignIn}>
-                      <i className="fas fa-sign-in-alt"></i>
-                    </button>
-                  ) : (
-                    <button id="signout-button" onClick={handleSignOut}>
-                      <i className="fas fa-sign-out-alt"></i>
-                    </button>
-                  )}
-                </div>
-                {showSettings && (
-                  <SettingsModal 
-                    onClose={() => setShowSettings(false)}
-                  />
-                )}
-                {history.length > 0 && activeChat >= 0 && activeChat < history.length ? (
-                  <ChatWindow 
-                    setHistory={setHistory}
-                    currentChat={history[activeChat]}
+    <div className="app">
+      <div className="content">
+        <ErrorBoundary>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <>
+                  <Sidebar 
+                    history={history} 
+                    onNewChat={handleNewChat} 
+                    showSettings={showSettings}
+                    setShowSettings={setShowSettings}
                     activeChat={activeChat}
-                    updateChatTitle={updateChatTitle}
-                    history={history}
-                    accessToken={localStorage.getItem('access_token')}
                     onChatSelect={handleChatSelect}
                   />
-                ) : (
-                  <div>No chat selected. Start a new chat.</div>
-                )}
-              </div>
-            </div>
-          }
-        />
-        <Route path="/signin" element={<SignInPage onLoginSuccess={handleLoginSuccess} />} />
-        <Route path="/signup" element={<SignUpPage />} />
-      </Routes>
-    </ErrorBoundary>
+                  <div className="chat-container">
+                    <h1>
+                      <span className="buc">Buc</span>
+                      <span className="buddy">Buddy</span>
+                    </h1>
+                    <div className="user-info">
+                      <span className="user-name">{user ? user.email : 'Guest'}</span>
+                      {!user ? (
+                        <button id="signin-button" onClick={handleSignIn}>
+                          <i className="fas fa-sign-in-alt"></i>
+                        </button>
+                      ) : (
+                        <button id="signout-button" onClick={handleSignOut}>
+                          <i className="fas fa-sign-out-alt"></i>
+                        </button>
+                      )}
+                    </div>
+                    {/* {showSettings && (
+                      <SettingsModal 
+                        onClose={() => setShowSettings(false)}
+                      />
+                    )} */}
+                    <ChatWindow 
+                      setHistory={setHistory}
+                      currentChat={history[activeChat] || {
+                        id: Date.now(),
+                        title: 'New Chat',
+                        conversationId: null
+                      }}
+                      activeChat={activeChat}
+                      updateChatTitle={updateChatTitle}
+                      history={history}
+                      accessToken={localStorage.getItem('access_token')}
+                      onChatSelect={handleChatSelect}
+                    />
+                  </div>
+                </>
+              }
+            />
+            <Route path="/signin" element={<SignInPage onLoginSuccess={handleLoginSuccess} />} />
+            <Route path="/signup" element={<SignUpPage />} />
+          </Routes>
+        </ErrorBoundary>
+      </div>
+      <Footer />
+    </div>
   );
 }
 

@@ -3,76 +3,40 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  background-color: #f4f4f9;
+  min-height: calc(100vh - 60px);
+  width: 100%;
   padding: 20px;
-}
-
-.signup-container h1 {
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 20px;
+  background-color: #f4f4f9;
 }
 
 .signup-form {
   display: flex;
   flex-direction: column;
+  align-items: center;  /* Center form elements */
   width: 100%;
   max-width: 400px;
   gap: 15px;
+  padding: 20px;
+  background-color: white;  /* Optional: adds contrast */
+  border-radius: 8px;      /* Optional: rounded corners */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Optional: subtle shadow */
 }
 
 .signup-form input {
-  padding: 10px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  outline: none;
-}
-
-.signup-form input:focus {
-  border-color: #007bff;
 }
 
 .signup-button {
-  background-color: #007bff;
+  width: 100%;
+  padding: 12px;
+  background-color: #041E42;  /* ETSU blue */
   color: white;
   border: none;
-  border-radius: 5px;
-  padding: 10px;
-  font-size: 16px;
+  border-radius: 4px;
   cursor: pointer;
-}
-
-.signup-button:hover {
-  background-color: #0056b3;
-}
-
-.success-message {
-  color: #28a745;
-  font-size: 14px;
-  margin-top: 10px;
-  text-align: center;
-}
-
-.error-message {
-  color: #dc3545;
-  font-size: 14px;
-  margin-top: 10px;
-  text-align: center;
-}
-
-.signin-text {
-  margin-top: 20px;
-  font-size: 14px;
-  color: #333;
-}
-
-.signin-link {
-  color: #007bff;
-  text-decoration: none;
-}
-
-.signin-link:hover {
-  text-decoration: underline;
+  font-size: 16px;
 }

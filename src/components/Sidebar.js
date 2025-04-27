@@ -20,12 +20,12 @@ function Sidebar({ history, onNewChat, showSettings, setShowSettings, activeChat
           </li>
         ))}
       </ul>
-      <button 
+      {/* <button 
         id="settings-button-sidebar" 
         onClick={() => setShowSettings(!showSettings)}
       >
         <i className="fas fa-cog"></i>
-      </button>
+      </button> */}
     </div>
   );
 }
