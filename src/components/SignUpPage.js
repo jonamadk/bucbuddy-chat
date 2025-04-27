@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SignUpPage.css';
 
-function SignUpPage() {
+function SignUpPage({ theme }) {
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State for toggling confirm password visibility
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ function SignUpPage() {
       if (response.ok) {
         setSuccessMessage('Registration successful! Redirecting to login...');
         setTimeout(() => {
-          navigate('/signin'); // Redirect to the sign-in page
+          navigate('/signin');
         }, 2000);
       } else {
         setError(data.error || 'Registration failed. Please try again.');
@@ -49,7 +49,7 @@ function SignUpPage() {
   };
 
   return (
-    <div className="signup-container">
+    <div className={`signup-container ${theme}`}>
       <div className="signup-card">
         <h1>Create an Account</h1>
         <form className="signup-form" onSubmit={handleSubmit}>
@@ -112,14 +112,10 @@ function SignUpPage() {
         </form>
         {successMessage && <p className="success-message">{successMessage}</p>}
         {error && <p className="error-message">{error}</p>}
-        <p className="signin-text">
-          Already have an account? <a href="/signin" className="signin-link">Sign in</a>
-        </p>
+        <button className="back-button" onClick={() => navigate('/signin')}>
+          <i className="fas fa-arrow-left"></i> Back to Sign In
+        </button>
       </div>
-      {/* Back Button */}
-      <button className="back-button" onClick={() => navigate('/signin')} aria-label="Back to Sign In">
-        <i className="fas fa-arrow-left"></i> Back to Sign In
-      </button>
     </div>
   );
 }

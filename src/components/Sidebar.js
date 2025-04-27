@@ -1,7 +1,7 @@
 import React from 'react';
 import NewChatFeature from './NewChatFeature';
 
-function Sidebar({ history, onNewChat, showSettings, setShowSettings, activeChat, onChatSelect }) {
+function Sidebar({ history, onNewChat, showSettings, setShowSettings, activeChat, onChatSelect, toggleTheme }) {
   return (
     <div id="sidebar">
       <div className="sidebar-header">
@@ -20,12 +20,13 @@ function Sidebar({ history, onNewChat, showSettings, setShowSettings, activeChat
           </li>
         ))}
       </ul>
-      {/* <button 
-        id="settings-button-sidebar" 
-        onClick={() => setShowSettings(!showSettings)}
+      <button 
+        id="theme-toggle-button" 
+        onClick={toggleTheme}
+        aria-label="Toggle Theme"
       >
-        <i className="fas fa-cog"></i>
-      </button> */}
+        <i className="fas fa-moon"></i>
+      </button>
     </div>
   );
 }

@@ -34,7 +34,18 @@ function App() {
   const [activeChat, setActiveChat] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
+  const [theme, setTheme] = useState('light'); // State for theme
   const navigate = useNavigate();
+
+  // Apply theme to the body element
+  useEffect(() => {
+    document.body.className = theme; // Dynamically set the theme class on the body
+  }, [theme]);
+
+  // Toggle theme between light and dark
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
 
   // Fetch user chat history on login
   useEffect(() => {
@@ -166,6 +177,7 @@ function App() {
                     setShowSettings={setShowSettings}
                     activeChat={activeChat}
                     onChatSelect={handleChatSelect}
+                    toggleTheme={toggleTheme} // Pass toggleTheme to Sidebar
                   />
                   <div className="chat-container">
                     <h1>
@@ -201,8 +213,8 @@ function App() {
                 </>
               }
             />
-            <Route path="/signin" element={<SignInPage onLoginSuccess={handleLoginSuccess} />} />
-            <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/signin" element={<SignInPage theme={theme} toggleTheme={toggleTheme} onLoginSuccess={handleLoginSuccess} />} />
+            <Route path="/signup" element={<SignUpPage theme={theme} toggleTheme={toggleTheme} />} />
           </Routes>
         </ErrorBoundary>
       </div>

@@ -165,3 +165,52 @@
 .back-button:hover {
   color: #4caf50;
 }
+
+/* Dark Mode for SignInPage */
+body.dark .signin-container {
+  background-color: #121212; /* Dark background for the page */
+  color: #e0e0e0; /* Light text color */
+}
+
+body.dark .signin-form {
+  background-color: #1e1e1e; /* Dark background for the form */
+  color: #e0e0e0; /* Light text color */
+  border: 1px solid #333; /* Darker border */
+}
+
+body.dark .signin-form input {
+  background-color: #2a2a2a; /* Darker input background */
+  color: #e0e0e0; /* Light text color */
+  border: 1px solid #444; /* Darker border */
+}
+
+body.dark .signin-form input::placeholder {
+  color: #999; /* Lighter placeholder text */
+}
+
+body.dark .continue-button {
+  background-color: #444; /* Darker button background */
+  color: #e0e0e0; /* Light text color */
+}
+
+body.dark .continue-button:hover {
+  background-color: #555; /* Slightly lighter background on hover */
+}
+
+body.dark .google-signin {
+  background-color: #2a2a2a; /* Darker background for Google button */
+  color: #e0e0e0; /* Light text color */
+  border: 1px solid #444; /* Darker border */
+}
+
+body.dark .google-signin i {
+  color: #db4437; /* Keep the Google icon red */
+}
+
+body.dark .back-button {
+  color: #e0e0e0; /* Light text color */
+}
+
+body.dark .back-button:hover {
+  color: #4caf50; /* Green hover effect */
+}

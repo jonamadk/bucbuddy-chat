@@ -193,7 +193,7 @@ h1 {
   .user-name {
     margin-right: 15px;
     font-size: 1rem;
-    color: #333;
+    color: #333; /* Default text color for light theme */
     font-weight: 500;
   }
   
@@ -442,7 +442,102 @@ h1 {
     font-weight: bold;
   }
   
-  /* Responsive Design */
+  /* Light Theme (Default) */
+body.light {
+  background-color: #f4f4f9;
+  color: #333;
+}
+
+body.light .chat-container {
+  background-color: #fff;
+  color: #333;
+}
+
+/* Dark Theme */
+body.dark {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+body.dark .chat-container {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+}
+
+/* Dark Mode for Sidebar */
+body.dark #sidebar {
+  background-color: #1e1e1e; /* Dark background for sidebar */
+  color: #e0e0e0; /* Light text color */
+  border-right: 1px solid #333; /* Darker border */
+}
+
+body.dark #sidebar h2 {
+  color: #e0e0e0; /* Light text for headings */
+}
+
+body.dark #sidebar ul li {
+  background-color: transparent; /* Transparent background for list items */
+  color: #e0e0e0; /* Light text color */
+}
+
+body.dark #sidebar ul li:hover {
+  background-color: #333; /* Slightly lighter background on hover */
+}
+
+body.dark #sidebar ul li.active {
+  background-color: #444; /* Highlight active item */
+  font-weight: bold;
+}
+
+/* Theme Toggle Button */
+#theme-toggle-button {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+#theme-toggle-button:hover {
+  color: #4caf50;
+}
+
+body.dark #theme-toggle-button {
+  color: #e0e0e0;
+}
+
+body.dark #theme-toggle-button:hover {
+  color: #4caf50;
+}
+
+/* User Info (Dark Theme) */
+body.dark .user-name {
+  color: #e0e0e0; /* Light text color for dark theme */
+}
+
+body.dark #signin-button {
+  background-color: #444; /* Darker background for sign-in button */
+  color: #e0e0e0; /* Light text color */
+}
+
+body.dark #signin-button:hover {
+  background-color: #555; /* Slightly lighter background on hover */
+}
+
+body.dark #signout-button {
+  background-color: #444; /* Darker background for sign-out button */
+  color: #e0e0e0; /* Light text color */
+}
+
+body.dark #signout-button:hover {
+  background-color: #555; /* Slightly lighter background on hover */
+
+/* Responsive Design */
   @media (max-width: 900px) {
     .app {
       flex-direction: column;
@@ -509,3 +604,4 @@ h1 {
       padding: 10px;
     }
   }
+}

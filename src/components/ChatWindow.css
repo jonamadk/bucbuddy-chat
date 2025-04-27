@@ -197,3 +197,57 @@
     align-self: center;
   }
 }
+
+/* Dark Mode for Chat Window */
+body.dark #chat-window {
+  background-color: #1e1e1e; /* Dark background for chat window */
+  color: #e0e0e0; /* Light text color */
+  border: 1px solid #333; /* Darker border */
+}
+
+body.dark .message {
+  background-color: #2a2a2a; /* Darker background for messages */
+  border: 1px solid #444; /* Darker border for messages */
+  color: #e0e0e0; /* Light text color */
+}
+
+body.dark .user-message {
+  background-color: #3a3a3a; /* Slightly lighter background for user messages */
+}
+
+body.dark .bot-message {
+  background-color: #2a2a2a; /* Darker background for bot messages */
+}
+
+body.dark .citation {
+  color: #999; /* Slightly lighter text for citations */
+}
+
+body.dark .citation a {
+  color: #4caf50; /* Green links for citations */
+}
+
+body.dark .input-box {
+  background-color: #2a2a2a; /* Darker background for input box */
+  border: 1px solid #444; /* Darker border */
+}
+
+body.dark .input-box textarea {
+  background-color: transparent; /* Transparent background for textarea */
+  color: #e0e0e0; /* Light text color */
+}
+
+body.dark .input-box textarea::placeholder {
+  color: #999; /* Lighter placeholder text */
+}
+
+body.dark #mic-button,
+body.dark #send-button {
+  background-color: #444; /* Darker background for buttons */
+  color: #e0e0e0; /* Light text color */
+}
+
+body.dark #mic-button:hover,
+body.dark #send-button:hover {
+  background-color: #555; /* Slightly lighter background on hover */
+}

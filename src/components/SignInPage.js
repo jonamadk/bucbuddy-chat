@@ -129,7 +129,17 @@ function SignInPage({ onLoginSuccess }) {
       {successMessage && <p className="success-message">{successMessage}</p>}
       {error && <p className="error-message">{error}</p>}
       <p className="signup-text">
-        Don't have an account? <a href="/signup" className="signup-link">Sign Up</a>
+        Don't have an account?{' '}
+        <a
+          href="/signup"
+          className="signup-link"
+          onClick={(e) => {
+            e.preventDefault();
+            navigate('/signup');
+          }}
+        >
+          Sign Up
+        </a>
       </p>
       <div className="divider"><span>OR</span></div>
       <div className="button-container">
@@ -137,7 +147,6 @@ function SignInPage({ onLoginSuccess }) {
           <i className="fab fa-google"></i> Continue with Google
         </button>
       </div>
-      {/* Back Button */}
       <button className="back-button" onClick={() => navigate('/')} aria-label="Back to Home">
         <i className="fas fa-arrow-left"></i> Back to Home
       </button>

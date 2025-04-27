@@ -8,3 +8,10 @@
   font-size: 0.9rem;
   margin-top: auto; /* This pushes the footer to the bottom */
 }
+
+/* Dark Mode for Footer */
+body.dark .footer {
+  background-color: #1e1e1e; /* Dark background for footer */
+  color: #e0e0e0; /* Light text color */
+  border-top: 1px solid #333; /* Darker border */
+}
