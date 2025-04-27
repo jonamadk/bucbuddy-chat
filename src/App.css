@@ -120,15 +120,17 @@ h1 {
     transform: translateY(-2px);
   }
   
+  /* Sidebar Styling */
   #sidebar {
     width: 250px;
-    height: 100vh;
+    height: 100vh; /* Full height for the sidebar */
     background-color: #fff;
     border-right: 1px solid #ddd;
     box-shadow: 0 0 10px rgba(159, 206, 237, 0.2);
     padding: 20px;
-    overflow-y: auto;
-    position: relative;
+    position: relative; /* Position relative for the toggle button */
+    display: flex;
+    flex-direction: column; /* Ensure proper layout for children */
   }
   
   #sidebar h2 {
@@ -180,6 +182,31 @@ h1 {
   
   #settings-button-sidebar i {
     font-size: 20px;
+  }
+  
+  /* History List Styling */
+  #history-list {
+    flex: 1; /* Allow the history list to take up available space */
+    overflow-y: auto; /* Enable scrolling for the history list */
+    margin-bottom: 80px; /* Add space at the bottom to avoid overlap with the toggle button */
+  }
+  
+  #history-list li {
+    cursor: pointer;
+    padding: 12px;
+    margin: 5px 0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+  }
+  
+  #history-list li:hover {
+    background-color: #f0f0f0;
+  }
+  
+  #history-list li.active {
+    background-color: #e0e0e0;
+    font-weight: bold;
   }
   
   .user-info {
@@ -424,22 +451,38 @@ h1 {
     z-index: 1000;
   }
   
-  #history-list li {
+  /* Theme Toggle Button */
+  #theme-toggle-button {
+    position: absolute; /* Position it relative to the sidebar */
+    bottom: 20px; /* Place it at the bottom of the sidebar */
+    left: 50%; /* Center it horizontally within the sidebar */
+    transform: translateX(-50%);
+    background: white; /* White background for contrast */
+    border: 1px solid #ddd; /* Add a border for better visibility */
+    border-radius: 50%; /* Make it circular */
+    width: 50px; /* Set a fixed width */
+    height: 50px; /* Set a fixed height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+    z-index: 1000; /* Ensure it stays above other elements */
     cursor: pointer;
-    padding: 12px;
-    margin: 5px 0;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
   }
   
-  #history-list li:hover {
-    background-color: #f0f0f0;
+  #theme-toggle-button:hover {
+    background-color: #f0f0f0; /* Slightly darker background on hover */
+    transform: translateX(-50%) translateY(-2px); /* Add a hover effect */
   }
   
-  #history-list li.active {
-    background-color: #e0e0e0;
-    font-weight: bold;
+  body.dark #theme-toggle-button {
+    background: white; /* Ensure the button remains white in dark mode */
+    color: #333; /* Dark text color for contrast */
+  }
+  
+  body.dark #theme-toggle-button:hover {
+    background-color: #e0e0e0; /* Slightly darker hover effect in dark mode */
   }
   
   /* Light Theme (Default) */
@@ -487,32 +530,6 @@ body.dark #sidebar ul li:hover {
 body.dark #sidebar ul li.active {
   background-color: #444; /* Highlight active item */
   font-weight: bold;
-}
-
-/* Theme Toggle Button */
-#theme-toggle-button {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: none;
-  border: none;
-  color: #333;
-  font-size: 20px;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-#theme-toggle-button:hover {
-  color: #4caf50;
-}
-
-body.dark #theme-toggle-button {
-  color: #e0e0e0;
-}
-
-body.dark #theme-toggle-button:hover {
-  color: #4caf50;
 }
 
 /* User Info (Dark Theme) */
