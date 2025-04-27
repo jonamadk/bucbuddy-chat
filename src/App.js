@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Component } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 import Sidebar from './components/Sidebar';
@@ -7,11 +7,32 @@ import SettingsModal from './components/SettingsModal';
 import SignInPage from './components/SignInPage';
 import SignUpPage from './components/SignUpPage';
 
+// eslint-disable-next-line react/prop-types
+class ErrorBoundary extends Component {
+  state = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '20px', color: 'red' }}>
+          <h1>Something went wrong.</h1>
+          <p>{this.state.error?.message}</p>
+          <button onClick={() => window.location.reload()}>Reload</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function App() {
   const [history, setHistory] = useState([]);
   const [activeChat, setActiveChat] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
-  const [voiceActivate, setVoiceActivate] = useState(false);
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
   const navigate = useNavigate();
 
@@ -19,7 +40,7 @@ function App() {
   useEffect(() => {
     const fetchUserHistory = async () => {
       if (!user || !localStorage.getItem('access_token')) {
-        setHistory([]); // Empty history for guest mode
+        setHistory([]);
         return;
       }
 
@@ -41,7 +62,7 @@ function App() {
             conversationId: conv.conversationId
           }));
           setHistory(formattedHistory);
-          setActiveChat(0);
+          setActiveChat(formattedHistory.length > 0 ? 0 : 0);
         } else {
           setHistory([]);
         }
@@ -60,11 +81,12 @@ function App() {
       title: 'New Chat',
       conversationId: null
     };
-    setHistory(prev => [...prev, newChat]);
-    setActiveChat(history.length);
+    setHistory(prev => [newChat, ...prev]); // Prepend new chat
+    setActiveChat(0); // Select the new chat (index 0)
   };
 
   const handleChatSelect = (index) => {
+    console.log('Selecting chat at index:', index);
     setActiveChat(index);
   };
 
@@ -78,13 +100,35 @@ function App() {
     navigate('/signin');
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    const accessToken = localStorage.getItem('access_token');
+    if (accessToken) {
+      try {
+        const response = await fetch('http://localhost:8000/api/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`Logout failed: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        console.log('Logout response:', data);
+        alert('You have been logged out successfully.');
+      } catch (error) {
+        console.error('Error during logout:', error.message, error.stack);
+      }
+    }
+
+    // Clear local state and storage
     localStorage.removeItem('access_token');
     localStorage.removeItem('user');
     setUser(null);
     setHistory([]);
     setActiveChat(0);
-    console.log('Sign out clicked');
+    console.log('Sign out completed');
     navigate('/signin');
   };
 
@@ -94,57 +138,60 @@ function App() {
   };
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <div className="app">
-            <Sidebar 
-              history={history} 
-              onNewChat={handleNewChat} 
-              showSettings={showSettings}
-              setShowSettings={setShowSettings}
-              activeChat={activeChat}
-              onChatSelect={handleChatSelect}
-            />
-            <div className="chat-container">
-              <h1>BucBuddy</h1>
-              <div className="user-info">
-                <span className="user-name">{user ? user.email : 'Guest'}</span>
-                {!user ? (
-                  <button id="signin-button" onClick={handleSignIn}>
-                    <i className="fas fa-sign-in-alt"></i>
-                  </button>
-                ) : (
-                  <button id="signout-button" onClick={handleSignOut}>
-                    <i className="fas fa-sign-out-alt"></i>
-                  </button>
-                )}
-              </div>
-              {showSettings && (
-                <SettingsModal 
-                  voiceActivate={voiceActivate}
-                  setVoiceActivate={setVoiceActivate}
-                  onClose={() => setShowSettings(false)}
-                />
-              )}
-              <ChatWindow 
-                setHistory={setHistory}
-                voiceActivate={voiceActivate}
-                currentChat={history[activeChat]}
+    <ErrorBoundary>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <div className="app">
+              <Sidebar 
+                history={history} 
+                onNewChat={handleNewChat} 
+                showSettings={showSettings}
+                setShowSettings={setShowSettings}
                 activeChat={activeChat}
-                updateChatTitle={updateChatTitle}
-                history={history}
-                accessToken={localStorage.getItem('access_token')}
                 onChatSelect={handleChatSelect}
               />
+              <div className="chat-container">
+                <h1>BucBuddy</h1>
+                <div className="user-info">
+                  <span className="user-name">{user ? user.email : 'Guest'}</span>
+                  {!user ? (
+                    <button id="signin-button" onClick={handleSignIn}>
+                      <i className="fas fa-sign-in-alt"></i>
+                    </button>
+                  ) : (
+                    <button id="signout-button" onClick={handleSignOut}>
+                      <i className="fas fa-sign-out-alt"></i>
+                    </button>
+                  )}
+                </div>
+                {showSettings && (
+                  <SettingsModal 
+                    onClose={() => setShowSettings(false)}
+                  />
+                )}
+                {history.length > 0 && activeChat >= 0 && activeChat < history.length ? (
+                  <ChatWindow 
+                    setHistory={setHistory}
+                    currentChat={history[activeChat]}
+                    activeChat={activeChat}
+                    updateChatTitle={updateChatTitle}
+                    history={history}
+                    accessToken={localStorage.getItem('access_token')}
+                    onChatSelect={handleChatSelect}
+                  />
+                ) : (
+                  <div>No chat selected. Start a new chat.</div>
+                )}
+              </div>
             </div>
-          </div>
-        }
-      />
-      <Route path="/signin" element={<SignInPage onLoginSuccess={handleLoginSuccess} />} />
-      <Route path="/signup" element={<SignUpPage />} />
-    </Routes>
+          }
+        />
+        <Route path="/signin" element={<SignInPage onLoginSuccess={handleLoginSuccess} />} />
+        <Route path="/signup" element={<SignUpPage />} />
+      </Routes>
+    </ErrorBoundary>
   );
 }
 
