@@ -3,40 +3,139 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 60px);
-  width: 100%;
+  height: 100vh; /* Full viewport height */
+  width: 100%; /* Full viewport width */
   padding: 20px;
-  background-color: #f4f4f9;
+  background-color: #ffffff;
+  font-family: Arial, sans-serif;
+  box-sizing: border-box; /* Ensure padding is included in width/height */
+}
+
+
+.signup-card {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+.signup-card h1 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
 }
 
 .signup-form {
   display: flex;
   flex-direction: column;
-  align-items: center;  /* Center form elements */
-  width: 100%;
-  max-width: 400px;
   gap: 15px;
-  padding: 20px;
-  background-color: white;  /* Optional: adds contrast */
-  border-radius: 8px;      /* Optional: rounded corners */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Optional: subtle shadow */
 }
 
 .signup-form input {
   width: 100%;
   padding: 12px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 5px;
   font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.signup-form input:focus {
+  border-color: #4caf50;
+  outline: none;
 }
 
 .signup-button {
   width: 100%;
   padding: 12px;
-  background-color: #041E42;  /* ETSU blue */
+  background-color: #4caf50;
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
   font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.signup-button:hover {
+  background-color: #45a049;
+}
+
+.success-message {
+  color: #4caf50;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.error-message {
+  color: #f44336;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.signin-text {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.signin-link {
+  color: #4caf50;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.signin-link:hover {
+  text-decoration: underline;
+}
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 40px; /* Add space for the toggle button */
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #4caf50;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.toggle-password:hover {
+  color: #45a049;
+}
+
+.back-button {
+  margin-top: 20px; /* Add spacing between the card and the button */
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px; /* Add spacing between the icon and text */
+}
+
+.back-button i {
+  font-size: 18px;
+}
+
+.back-button:hover {
+  color: #4caf50;
 }

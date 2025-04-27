@@ -75,7 +75,7 @@ function App() {
     fetchUserHistory();
   }, [user]);
 
-  // Initialize with a default chat
+  // Ensure a default "New Chat" window exists for both logged-in and guest users
   useEffect(() => {
     if (history.length === 0) {
       const defaultChat = {
@@ -86,7 +86,7 @@ function App() {
       setHistory([defaultChat]);
       setActiveChat(0);
     }
-  }, []); // Run once on component mount
+  }, [history]); // Run whenever history changes
 
   const handleNewChat = () => {
     const newChat = {
@@ -184,11 +184,6 @@ function App() {
                         </button>
                       )}
                     </div>
-                    {/* {showSettings && (
-                      <SettingsModal 
-                        onClose={() => setShowSettings(false)}
-                      />
-                    )} */}
                     <ChatWindow 
                       setHistory={setHistory}
                       currentChat={history[activeChat] || {

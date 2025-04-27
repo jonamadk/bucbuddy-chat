@@ -32,7 +32,7 @@
   overflow-y: auto;
 }
   
-  h1 {
+h1 {
   text-align: center;
   margin: 20px 0;
   font-size: 2.5rem;
@@ -41,13 +41,8 @@
   gap: 4px;
 }
 
-.buc {
-  color: #041E42; /* ETSU Blue */
-  font-weight: bold;
-}
-
-.buddy {
-  color: #FFC72C; /* ETSU Gold */
+.buc, .buddy {
+  color: royalblue; /* Change the color to Royal Blue */
   font-weight: bold;
 }
   

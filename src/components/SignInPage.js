@@ -5,6 +5,7 @@ import './SignInPage.css';
 function SignInPage({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -102,13 +103,23 @@ function SignInPage({ onLoginSuccess }) {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div className="password-wrapper">
+          <input
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowPassword((prev) => !prev)}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+          </button>
+        </div>
         <div className="button-container">
           <button type="submit" className="continue-button" disabled={isLoading}>
             {isLoading ? 'Signing In...' : 'Continue'}
@@ -126,6 +137,10 @@ function SignInPage({ onLoginSuccess }) {
           <i className="fab fa-google"></i> Continue with Google
         </button>
       </div>
+      {/* Back Button */}
+      <button className="back-button" onClick={() => navigate('/')} aria-label="Back to Home">
+        <i className="fas fa-arrow-left"></i> Back to Home
+      </button>
     </div>
   );
 }
