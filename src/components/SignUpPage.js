@@ -1,23 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SignUpPage.css';
 
-function SignUpPage({ theme }) {
+function SignUpPage({ theme, onLoginSuccess }) {
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State for toggling confirm password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // ✅ Handle Google OAuth redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const userData = params.get('user');
+    const token = params.get('token');
+    const errorMessage = params.get('error');
+
+    if (errorMessage) {
+      setError(`Google OAuth failed: ${decodeURIComponent(errorMessage)}. Please try again or use email/password.`);
+      return;
+    }
+
+    if (userData && token) {
+      try {
+        const parsedUser = JSON.parse(decodeURIComponent(userData));
+        localStorage.setItem('access_token', token);
+        localStorage.setItem('user', JSON.stringify(parsedUser));
+        if (typeof onLoginSuccess === 'function') {
+          onLoginSuccess(parsedUser);
+        }
+        navigate('/', { replace: true });
+      } catch (err) {
+        console.error('OAuth redirect error:', err);
+        setError('Failed to process Google OAuth login. Try again or use email/password.');
+      }
+    }
+  }, [onLoginSuccess, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
+    setIsLoading(true);
 
     try {
       const response = await fetch('http://localhost:8000/api/register', {
@@ -43,9 +73,15 @@ function SignUpPage({ theme }) {
         setError(data.error || 'Registration failed. Please try again.');
       }
     } catch (err) {
-      console.error('Error during registration:', err);
-      setError('An error occurred. Please try again later.');
+      console.error('Registration error:', err);
+      setError('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = 'http://localhost:8000/api/auth/login'; // Same as SignInPage
   };
 
   return (
@@ -108,12 +144,32 @@ function SignUpPage({ theme }) {
               <i className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
             </button>
           </div>
-          <button type="submit" className="signup-button">Sign Up</button>
+          <button type="submit" className="signup-button" disabled={isLoading}>
+            {isLoading ? 'Registering...' : 'Sign Up'}
+          </button>
         </form>
+
         {successMessage && <p className="success-message">{successMessage}</p>}
         {error && <p className="error-message">{error}</p>}
-        <button className="back-button" onClick={() => navigate('/signin')}>
-          <i className="fas fa-arrow-left"></i> Back to Sign In
+
+        <div className="signup-divider">
+          <span>
+            Already have an account?{' '}
+            <button className="login-link" onClick={() => navigate('/signin')}>
+              Log in
+            </button>
+          </span>
+          <div className="or-divider">
+            <hr /> <span>OR</span> <hr />
+          </div>
+          <button className="google-signin" onClick={handleGoogleLogin} disabled={isLoading}>
+            <i className="fab fa-google"></i> Continue with Google
+          </button>
+        </div>
+
+   
+        <button className="back-button" onClick={() => navigate('/')} aria-label="Back">
+          <i className="fas fa-arrow-left"></i> Back 
         </button>
       </div>
     </div>

@@ -217,3 +217,97 @@ body.dark .google-signin {
 body.dark .google-signin i {
   color: #db4437; /* Keep the Google icon red */
 }
+
+.signup-divider {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.login-link {
+  background: none;
+  border: none;
+  color: #4caf50;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 14px;
+}
+
+.login-link:hover {
+  color: #45a049;
+  text-decoration: underline;
+}
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 15px 0;
+  gap: 10px;
+}
+
+.or-divider hr {
+  flex: 1;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+
+.or-divider span {
+  font-size: 12px;
+  color: #555;
+}
+
+.google-signin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: white;
+  color: black;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  width: 100%;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.google-signin:hover {
+  background-color: #f0f0f0;
+}
+
+.google-signin i {
+  color: #db4437;
+}
+
+.back-button {
+  margin-top: 20px; /* Space from the last element */
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px; /* Space between the icon and text */
+}
+
+.back-button i {
+  font-size: 18px;
+}
+
+.back-button:hover {
+  color: #4caf50; /* Green hover color */
+}
+
+/* Dark mode support */
+body.dark .back-button {
+  color: #e0e0e0;
+}
+
+body.dark .back-button:hover {
+  color: #4caf50;
+}
