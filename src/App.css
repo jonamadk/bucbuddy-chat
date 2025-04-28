@@ -41,13 +41,12 @@ h1 {
   gap: 4px;
 }
 
+/* BucBuddy Title */
 .bucbuddy-title {
-  text-align: center;
-  font-size: 2rem;
-  margin: 0 auto;
-  display: flex;
-  justify-content: center;
-  gap: 4px;
+  font-size: 2rem; /* Adjust font size */
+  font-weight: bold; /* Make the text bold */
+  color: royalblue; /* Set the text color */
+  margin: 0; /* Remove default margin */
 }
 
 .buc, .buddy {
@@ -563,6 +562,7 @@ body.dark #signout-button {
 
 body.dark #signout-button:hover {
   background-color: #555; /* Slightly lighter background on hover */
+}
 
 /* Responsive Design */
 @media (max-width: 900px) {
@@ -631,38 +631,60 @@ body.dark #signout-button:hover {
       padding: 10px;
     }
   }
+
+/* Hide Sign Up Button on Mobile Devices */
+@media (max-width: 600px) {
+  .signup-main-button {
+    display: none;
+  }
 }
+
+
+
 /* Sidebar toggle button styles */
 .mobile-toggle-button {
-  display: none;
   background-color: transparent;
   border: none;
   color: #007bff;
   font-size: 1.8rem;
   cursor: pointer;
   margin-right: 10px;
+  display: none; /* Default to hidden */
+}
+
+/* Show the toggle button only on mobile devices */
+@media (max-width: 900px) {
+  .mobile-toggle-button {
+    display: block; /* Show the toggle button on smaller screens */
+  }
 }
 
 /* Merge chat-header and user-info into a single container */
 .chat-header-user-info {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 20px; /* Adjust spacing as needed */
-  position: relative;
+  display: flex; /* Use flexbox for horizontal alignment */
+  align-items: center; /* Vertically center the items */
+  justify-content: space-between; /* Distribute space between items */
+  gap: 10px; /* Add spacing between items */
+  margin-bottom: 20px; /* Adjust spacing below the container */
+  position: relative; /* Keep relative positioning for user-info */
 }
 
 .chat-header-user-info .mobile-toggle-button {
-  margin-right: 10px;
+  margin-right: 10px; /* Add spacing to the right of the toggle button */
+}
+
+.chat-header-user-info .bucbuddy-title {
+  flex-grow: 1; /* Allow the title to take up available space */
+  text-align: center; /* Center the title horizontally */
 }
 
 .chat-header-user-info .user-info {
-  position: absolute;
-  top: -10px; /* Move slightly above */
-  right: 0;
-  display: flex;
-  align-items: center;
+  display: flex; /* Use flexbox for horizontal alignment */
+  align-items: center; /* Vertically center the user icon and buttons */
+  gap: 5px; /* Add spacing between the user icon and buttons */
+  position: absolute; /* Keep relative positioning */
+  top: -5px; /* Move the user-info container slightly upward */
+  right: 10px; /* Keep it aligned to the right */
 }
 
 /* Responsive sidebar overlay */
@@ -694,5 +716,210 @@ body.dark #signout-button:hover {
 
   .chat-container {
     width: 100%;
+  }
+}
+
+/* Sign In (Log in) Button */
+.login-button {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  border-radius: 20px;
+  padding: 10px 20px;
+  width: 100px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-right: 10px;
+}
+
+.login-button:hover {
+  background-color: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+/* Sign Up Button */
+.signup-main-button {
+  background-color: black;
+  color: white;
+  border: 1px solid black;
+  border-radius: 20px;
+  padding: 10px 20px;
+  width: 105px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.signup-main-button:hover {
+  background-color: #333;
+  transform: translateY(-2px);
+}
+
+/* Hide Sign Up Button on Mobile Devices */
+@media (max-width: 600px) {
+  .signup-main-button {
+    display: none;
+  }
+}
+
+/* User Icon */
+.user-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+/* Sign Out Button */
+#signout-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#signout-button:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+}
+
+/* Adjust BucBuddy text for mobile view */
+@media (max-width: 600px) {
+  .bucbuddy-title {
+    font-size: 1.2rem;
+    text-align: left; /* Adjust font size for smaller screens */
+    margin-left: 0px; /* Decrease font size for smaller screens */
+  }
+
+  .login-button {
+    padding: 5px 12px; /* Reduce padding for smaller size */
+    width: auto; /* Allow the button to adjust its width */
+    font-size: 12px; /* Decrease font size */
+  }
+
+  .signup-main-button {
+    display: none; /* Hide the Sign Up button on mobile */
+  }
+
+  .chat-header-user-info .bucbuddy-title {
+    text-align: left; /* Align the title to the left */
+    font-size: 1.2rem; /* Adjust font size for smaller screens */
+    margin-left: 0px; /* Add some left margin for spacing */
+  }
+}
+
+.toggle-and-title {
+/* Default (Desktop/Laptop View) - Center BucBuddy */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centered */
+  width: 100%;
+}
+
+/* But hide the sidebar toggle button on desktop view */
+.mobile-toggle-button {
+  display: none;
+}
+
+/* Mobile View adjustments */
+@media (max-width: 900px) {
+  .toggle-and-title {
+    justify-content: flex-start; /* Align to left in mobile */
+  }
+
+  .mobile-toggle-button {
+    display: block; /* Show sidebar toggle on mobile */
+  }
+
+  .bucbuddy-title {
+    text-align: left;
+    margin-left: 5px;
+  }
+}
+
+
+
+/* Mobile View - h3 size */
+@media (max-width: 900px) {
+  .bucbuddy-title {
+    font-size: 1.2rem; /* h3 size */
+    text-align: left;
+    margin-left: 5px;
+  }
+}
+
+/* Default Desktop View */
+.chat-header-user-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.toggle-and-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.mobile-toggle-button {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .chat-header-user-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .toggle-and-title {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .mobile-toggle-button {
+    display: block;
+  }
+
+  .bucbuddy-title {
+    font-size: 1.5rem;
+    text-align: left;
+    margin-left: 5px;
+  }
+
+
+  .user-info {
+    position: static !important;       /* REMOVE absolute positioning */
+    margin-left: auto;                 /* Push to right side */
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .login-button,
+  .signup-main-button {
+    white-space: nowrap;
   }
 }
