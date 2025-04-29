@@ -7,42 +7,42 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
   const [isListening, setIsListening] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null);
-  const [isFirstInput, setIsFirstInput] = useState(true); // Track first input for new chat
-  const [tempConversationId, setTempConversationId] = useState(null); // Track temporary chat ID
+  const [isFirstInput, setIsFirstInput] = useState(true);
+  const [tempConversationId, setTempConversationId] = useState(null);
   const chatWindowRef = useRef(null);
   const recognitionRef = useRef(null);
   const speechSynthesisRef = useRef(window.speechSynthesis);
 
-  // Auto scroll when new message arrives
+  // Auto scroll
   useEffect(() => {
     if (chatWindowRef.current) {
       chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
     }
   }, [messages]);
 
-  // Reset state when switching chats
+  // Load chat history
   useEffect(() => {
     let isMounted = true;
 
     const fetchHistory = async () => {
-      setMessages([]); // Clear messages for new chat
-      setTempConversationId(currentChat?.id || null); // Set temporary chat ID
+      setMessages([]);
+      setTempConversationId(currentChat?.id || null);
 
       if (!currentChat?.conversationId) {
-        console.log('No conversationId, resetting for new chat');
-        setIsFirstInput(true); // Reset for new chat
+        setIsFirstInput(true);
         return;
       }
 
       try {
-        console.log('Fetching history for conversationId:', currentChat.conversationId);
         const response = await fetch(
           `http://localhost:8000/api/conversation/${currentChat.conversationId}/history`,
-          { headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {} }
+          {
+            headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
+          }
         );
+
         if (!response.ok) throw new Error(`Failed to fetch history: ${response.status}`);
         const data = await response.json();
-        console.log('Fetched history:', JSON.stringify(data, null, 2));
 
         if (isMounted && data.conversation_history) {
           const formatted = data.conversation_history.map(msg => ([
@@ -50,7 +50,7 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
             { text: msg.llmresponse, type: 'bot', citations: data.documents || [] }
           ])).flat();
           setMessages(formatted);
-          setIsFirstInput(false); // History loaded, not first input
+          setIsFirstInput(false);
         }
       } catch (error) {
         console.error('Error loading history:', error);
@@ -61,10 +61,7 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
     };
 
     fetchHistory();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [currentChat?.id, currentChat?.conversationId, accessToken]);
 
   // Setup speech recognition
@@ -76,11 +73,9 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
 
       recognitionRef.current.onstart = () => setIsListening(true);
       recognitionRef.current.onend = () => setIsListening(false);
-
       recognitionRef.current.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
-        setQuery(transcript); // Update textarea with voice input
-        // Instead of directly calling sendMessage, submit the form
+        setQuery(transcript);
         const form = document.getElementById('chat-form');
         if (form) {
           form.dispatchEvent(new Event('submit', { cancelable: true }));
@@ -89,25 +84,27 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
     }
   }, []);
 
-  // Unified function to send message (typed or mic)
+  // Unified send message
   const sendMessage = async (inputQuery = query) => {
     if (!inputQuery.trim() || isLoading) return;
+
+    // Detect offline
+    if (!navigator.onLine) {
+      setMessages(prev => [...prev, { text: 'You are offline. Please connect to internet and try again.', type: 'bot' }]);
+      return;
+    }
 
     setIsLoading(true);
     const userMessage = { text: inputQuery, type: 'user' };
 
-    // Handle first input in new chat
     if (!currentChat?.conversationId && isFirstInput && currentChat?.id === tempConversationId) {
-      console.log('Sending first message in new chat...');
-      updateChatTitle(activeChat, inputQuery.substring(0, 30) + '...'); // Rename for first input
-      setMessages([userMessage]); // Clear messages for new chat
-      setIsFirstInput(false); // Mark as processed
+      updateChatTitle(activeChat, inputQuery.substring(0, 30) + '...');
+      setMessages([userMessage]);
+      setIsFirstInput(false);
     } else {
-      // Existing chat or subsequent input
       setMessages(prev => [...prev, userMessage]);
     }
 
-    // Clear textarea only for typed input
     if (inputQuery === query) {
       setQuery('');
     }
@@ -115,16 +112,15 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
     try {
       const requestBody = {
         userquery: inputQuery,
-        conversation_id: currentChat?.conversationId || null
+        conversation_id: currentChat?.conversationId || null,
       };
 
-      console.log('Sending message:', { conversationId: requestBody.conversation_id, userquery: inputQuery });
       const endpoint = accessToken ? '/api/auth/chat' : '/api/chat';
       const response = await fetch(`http://localhost:8000${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
         },
         body: JSON.stringify(requestBody),
       });
@@ -134,15 +130,12 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
       }
 
       const data = await response.json();
-      console.log('Server response:', JSON.stringify(data, null, 2));
 
       if (data.error) {
         throw new Error(data.error);
       }
 
-      // Update conversation ID for new chat
       if (data.conversation_id && !currentChat?.conversationId) {
-        console.log('Real conversation_id received:', data.conversation_id);
         setHistory(prev => {
           const updated = [...prev];
           if (updated[activeChat] && updated[activeChat].id === tempConversationId) {
@@ -152,22 +145,16 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
         });
       }
 
-      // Add bot response
-      const responseId = data.conversation_id || currentChat?.conversationId;
-      if (data.conversation_history && responseId) {
-        const latestMessage = data.conversation_history[responseId]?.slice(-1)[0];
-        if (latestMessage?.llmresponse) {
+      if (data.conversation_history) {
+        const latest = data.conversation_history[data.conversation_id]?.slice(-1)[0];
+        if (latest?.llmresponse) {
           const botMessage = {
-            text: latestMessage.llmresponse,
+            text: latest.llmresponse,
             type: 'bot',
-            citations: data.documents || []
+            citations: data.documents || [],
           };
           setMessages(prev => [...prev, botMessage]);
-        } else {
-          throw new Error('No valid response received');
         }
-      } else {
-        throw new Error('Invalid response data');
       }
     } catch (error) {
       console.error('Error sending message:', error.message);
@@ -177,7 +164,6 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
     }
   };
 
-  // Toggle microphone listening
   const toggleMic = () => {
     if (isListening) {
       recognitionRef.current.stop();
@@ -186,7 +172,6 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
     }
   };
 
-  // Enter key sending
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -196,15 +181,12 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
     }
   };
 
-  // Voice button for bot responses
   const toggleSpeak = (index, text) => {
     if (speakingMessageIndex === index) {
-      // Stop speaking
       speechSynthesisRef.current.cancel();
       setSpeakingMessageIndex(null);
     } else {
-      // Start speaking
-      speechSynthesisRef.current.cancel(); // Stop any ongoing speech
+      speechSynthesisRef.current.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
       utterance.onend = () => setSpeakingMessageIndex(null);
@@ -213,11 +195,9 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
     }
   };
 
-  // Copy to clipboard function
   const handleCopy = async (text, index) => {
     try {
       await navigator.clipboard.writeText(text);
-      // Optional: Show visual feedback
       const copyButton = document.querySelector(`#copy-button-${index}`);
       copyButton.classList.add('copied');
       copyButton.innerHTML = '<i class="fas fa-check"></i>';
@@ -242,7 +222,6 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
                   className="voice-button"
                   onClick={() => toggleSpeak(idx, msg.text)}
                   title={speakingMessageIndex === idx ? 'Stop reading' : 'Read aloud'}
-                  aria-label={speakingMessageIndex === idx ? 'Stop reading' : 'Read aloud'}
                 >
                   <i className={`fas ${speakingMessageIndex === idx ? 'fa-stop' : 'fa-volume-up'}`}></i>
                 </button>
@@ -251,7 +230,6 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
                   className="copy-button"
                   onClick={() => handleCopy(msg.text, idx)}
                   title="Copy to clipboard"
-                  aria-label="Copy to clipboard"
                 >
                   <i className="fas fa-copy"></i>
                 </button>
@@ -271,6 +249,7 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
           </div>
         ))}
       </div>
+
       <form id="chat-form" onSubmit={(e) => { e.preventDefault(); sendMessage(query); }}>
         <div className="input-wrapper">
           <div className="input-box">
@@ -290,7 +269,6 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
                   onClick={toggleMic}
                   disabled={isLoading}
                   title={isListening ? 'Stop recording' : 'Start recording'}
-                  aria-label={isListening ? 'Stop recording' : 'Start recording'}
                 >
                   <i className="fas fa-microphone"></i>
                 </button>
@@ -300,7 +278,6 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
                 id="send-button"
                 disabled={isLoading}
                 title="Send message"
-                aria-label="Send message"
               >
                 <i className="fas fa-paper-plane"></i>
               </button>

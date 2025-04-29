@@ -926,9 +926,9 @@ body.dark #signout-button:hover {
 
 @media (max-width: 600px) {
   .user-icon {
-    width: 35px;           /* ✅ Reduce size on mobile */
-    height: 35px;          /* ✅ Keep it circular */
-    font-size: 14px;       /* ✅ Adjust font size */
+    width: 35px;           /*  Reduce size on mobile */
+    height: 35px;          /* Keep it circular */
+    font-size: 14px;       /*  Adjust font size */
     margin-right: 8px;     /* Optional: Slightly reduce margin */
   }
 }
