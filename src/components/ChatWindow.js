@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github.css';
 import './ChatWindow.css';
 
 function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, history, accessToken, onChatSelect }) {
@@ -13,14 +17,12 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
   const recognitionRef = useRef(null);
   const speechSynthesisRef = useRef(window.speechSynthesis);
 
-  // Auto scroll
   useEffect(() => {
     if (chatWindowRef.current) {
       chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
     }
   }, [messages]);
 
-  // Load chat history
   useEffect(() => {
     let isMounted = true;
 
@@ -64,7 +66,6 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
     return () => { isMounted = false; };
   }, [currentChat?.id, currentChat?.conversationId, accessToken]);
 
-  // Setup speech recognition
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       recognitionRef.current = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -84,11 +85,9 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
     }
   }, []);
 
-  // Unified send message
   const sendMessage = async (inputQuery = query) => {
     if (!inputQuery.trim() || isLoading) return;
 
-    // Detect offline
     if (!navigator.onLine) {
       setMessages(prev => [...prev, { text: 'You are offline. Please connect to internet and try again.', type: 'bot' }]);
       return;
@@ -97,13 +96,16 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
     setIsLoading(true);
     const userMessage = { text: inputQuery, type: 'user' };
 
+    let newMessages;
     if (!currentChat?.conversationId && isFirstInput && currentChat?.id === tempConversationId) {
       updateChatTitle(activeChat, inputQuery.substring(0, 30) + '...');
-      setMessages([userMessage]);
+      newMessages = [userMessage, { text: '...', type: 'bot', placeholder: true }];
       setIsFirstInput(false);
     } else {
-      setMessages(prev => [...prev, userMessage]);
+      newMessages = [...messages, userMessage, { text: '...', type: 'bot', placeholder: true }];
     }
+
+    setMessages(newMessages);
 
     if (inputQuery === query) {
       setQuery('');
@@ -148,12 +150,16 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
       if (data.conversation_history) {
         const latest = data.conversation_history[data.conversation_id]?.slice(-1)[0];
         if (latest?.llmresponse) {
-          const botMessage = {
-            text: latest.llmresponse,
-            type: 'bot',
-            citations: data.documents || [],
-          };
-          setMessages(prev => [...prev, botMessage]);
+          const updatedMessages = [...newMessages];
+          const placeholderIndex = updatedMessages.findIndex(m => m.placeholder);
+          if (placeholderIndex !== -1) {
+            updatedMessages[placeholderIndex] = {
+              text: latest.llmresponse,
+              type: 'bot',
+              citations: data.documents || [],
+            };
+            setMessages(updatedMessages);
+          }
         }
       }
     } catch (error) {
@@ -215,8 +221,22 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
       <div id="chat-window" ref={chatWindowRef}>
         {messages.map((msg, idx) => (
           <div key={idx} className={`message ${msg.type}-message`}>
-            <span>{msg.text}</span>
-            {msg.type === 'bot' && (
+            {msg.placeholder ? (
+                <div className="typing-dots">
+                  <span>Typing</span>
+                  <span className="dot" />
+                  <span className="dot" />
+                  <span className="dot" />
+                </div>
+              ) : (
+                <ReactMarkdown
+                  children={msg.text}
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                />
+              )}
+
+            {msg.type === 'bot' && !msg.placeholder && (
               <div className="message-actions">
                 <button
                   className="voice-button"
