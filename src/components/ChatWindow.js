@@ -13,6 +13,9 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
   const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null);
   const [isFirstInput, setIsFirstInput] = useState(true);
   const [tempConversationId, setTempConversationId] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showError, setShowError] = useState(false);
+
   const chatWindowRef = useRef(null);
   const recognitionRef = useRef(null);
   const speechSynthesisRef = useRef(window.speechSynthesis);
@@ -106,7 +109,6 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
     }
 
     setMessages(newMessages);
-
     if (inputQuery === query) {
       setQuery('');
     }
@@ -164,7 +166,12 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
       }
     } catch (error) {
       console.error('Error sending message:', error.message);
-      setMessages(prev => [...prev, { text: 'Error fetching response.', type: 'bot' }]);
+      if (error.message.includes('429')) {
+        setErrorMessage('Rate limit exceeded. Please try againn later !.');
+      } else {
+        setErrorMessage(error.message || 'Something went wrong !');
+      }
+      setShowError(true);
     } finally {
       setIsLoading(false);
     }
@@ -218,23 +225,34 @@ function ChatWindow({ setHistory, currentChat, activeChat, updateChatTitle, hist
 
   return (
     <div className="chat-window-wrapper">
+      {/* Error Modal Popup */}
+      {showError && (
+        <div className="error-modal">
+          <div className="error-modal-content">
+            <span className="close-button" onClick={() => setShowError(false)}>&times;</span>
+            <h3>Error</h3>
+            <p>{errorMessage}</p>
+          </div>
+        </div>
+      )}
+
       <div id="chat-window" ref={chatWindowRef}>
         {messages.map((msg, idx) => (
           <div key={idx} className={`message ${msg.type}-message`}>
             {msg.placeholder ? (
-                <div className="typing-dots">
-                  <span>Typing</span>
-                  <span className="dot" />
-                  <span className="dot" />
-                  <span className="dot" />
-                </div>
-              ) : (
-                <ReactMarkdown
-                  children={msg.text}
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeHighlight]}
-                />
-              )}
+              <div className="typing-dots">
+                <span>Typing</span>
+                <span className="dot" />
+                <span className="dot" />
+                <span className="dot" />
+              </div>
+            ) : (
+              <ReactMarkdown
+                children={msg.text}
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeHighlight]}
+              />
+            )}
 
             {msg.type === 'bot' && !msg.placeholder && (
               <div className="message-actions">
