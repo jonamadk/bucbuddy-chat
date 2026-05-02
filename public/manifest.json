@@ -1,8 +1,26 @@
 {
-    "short_name": "BucBuddy",
-    "name": "BucBuddy Chat",
-    "start_url": ".",
-    "display": "standalone",
-    "theme_color": "#000000",
-    "background_color": "#ffffff"
-  }
+  "short_name": "BucBuddy",
+  "name": "BucBuddy — ETSU AI Assistant",
+  "description": "AI-powered ETSU campus assistant",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0D1B4B",
+  "background_color": "#0D1B4B",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "logo192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"]
+}

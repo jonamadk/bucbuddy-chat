@@ -36,7 +36,7 @@ function SignInPage({ onLoginSuccess }) {
     setSuccessMessage('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/login', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -61,7 +61,7 @@ function SignInPage({ onLoginSuccess }) {
 
   // Redirect to Flask OAuth route
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:8000/api/auth/login';
+    window.location.href = `${process.env.REACT_APP_API_URL || "http://127.0.0.1:8000"}/api/auth/login`;
   };
 
   return (
